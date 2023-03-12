@@ -1,29 +1,29 @@
-# Petit pendu
-Petit jeu du pendu
+# rymupdater
+Update id3 tags with RYM database
 
-## Installation
+## Installing
 Python >= 3.10
 
 ### Poetry
 ```commandline
 poetry install
 ```
-### Sinon
-Par exemple dans un venv :
+### else
+In a virtual environment:
 ```commandline
 pip install -r requirements.txt
 ```
 
-## Lancement
+## Launch
 
 ### Poetry
-À la racine du projet :
+In project root:
 ```commandline
 poetry run python -um src.presentation.app 
 ```
-### Sinon
-Par exemple dans un venv à la racine du projet :
+### else
+In a virtual environment:
 ```commandline
 python -um src.presentation.app
 ```
-Voir ./LICENSE pour plus d'informations sur la license de ce programme.
+See ./LICENSE for more information about this program's licence.
