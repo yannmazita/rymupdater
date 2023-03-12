@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "rymupdater"
+version = "0.1.0"
+description = "Update id3 tags with RYM database"
+authors = ["Yann Mazita <dev.mazita@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mutagen = "^1.46.0"
+
+[tool.pyright]
+include = ["src"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
