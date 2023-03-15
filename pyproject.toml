@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+rymscraper = {git = "https://github.com/dbeley/rymscraper"}
 mutagen = "^1.46.0"
 
 [tool.pyright]
