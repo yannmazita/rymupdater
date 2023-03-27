@@ -8,8 +8,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-rymscraper = {git = "https://github.com/dbeley/rymscraper"}
 mutagen = "^1.46.0"
+selenium = "^4.8.3"
+webdriver-manager = "^3.8.5"
 
 [tool.pyright]
 include = ["src"]
