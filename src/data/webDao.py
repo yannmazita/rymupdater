@@ -8,7 +8,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.relative_locator import locate_with
 
 
 class RYMtags:
@@ -51,14 +50,12 @@ class RYMtags:
         url: str = self.getReleaseURL(artist, release)
         self.__driver.get(url)
 
-        tags = self.__driver.find_elements(By.CLASS_NAME, "info_hdr")
-        values = self.__driver.find_elements(By.XPATH,
-                                                "//table[@class='album_info']/tbody/tr/td")
-        #[print(i.text) for i in tags]
-        #[print(i.text) for i in values]
+        elements = self.__driver.find_elements(By.XPATH,
+                                                "//table[@class='album_info']/tbody/tr/td|//table[@class='album_info']/tbody/tr/th")
+        [print(i.text) for i in elements]
 
         return dic
 
-#rym = RYMtags()
-#print(rym.getReleaseURL("The Knife", "Silent Shout"))
-#rym.getTagsFromRYM("The Knife", "Silent Shout")
+rym = RYMtags()
+print(rym.getReleaseURL("The Knife", "Silent Shout"))
+rym.getTagsFromRYM("The Knife", "Silent Shout")
