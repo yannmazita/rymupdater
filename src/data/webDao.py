@@ -13,6 +13,8 @@ from selenium.webdriver.support.relative_locator import locate_with
 
 class RYMtags:
     """RYM data access"""
+    def __init__(self):
+        self.__driver: webdriver.Chrome = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()))
 
     @staticmethod
     def __getSearchURL(artist: str, release: str) -> str:
@@ -29,35 +31,34 @@ class RYMtags:
         body: str = quote(artist + release, safe='')
         return urlStart + body
 
-    @staticmethod
-    def getReleaseURL(driver: webdriver.Chrome, artist: str, release: str) -> str:
+    def getReleaseURL(self, artist: str, release: str) -> str:
         """
             Get album URL from first match in RYM search.
             Args:
-                driver: Selenium web driver.
                 artist: The artist to search for.
                 release: The release to search for.
             Returns:
                 str: The URL.
         """
-        driver.get(RYMtags.__getSearchURL(artist, release))
+        self.__driver.get(RYMtags.__getSearchURL(artist, release))
 
-        releaseLocator = locate_with(By.CLASS_NAME, "searchpage").below({By.TAG_NAME: "h3"})
-        element = driver.find_element(releaseLocator)
+        element = self.__driver.find_element(By.CLASS_NAME, "searchpage")
         url: str = element.get_attribute("href")
         return url
 
-    def getTagsFromRYM(self, driver: webdriver.Chrome, artist: str, release: str) -> dict[AudioTags, str]:
+    def getTagsFromRYM(self, artist: str, release: str) -> dict[AudioTags, str]:
         dic = {}
-        url: str = self.getReleaseURL(driver, artist, release)
-        driver.get(url)
+        url: str = self.getReleaseURL(artist, release)
+        self.__driver.get(url)
 
-        mainTagLocator = locate_with(By.CLASS_NAME, "info_hdr")
-        elements = driver.find_elements(mainTagLocator)
-
+        tags = self.__driver.find_elements(By.CLASS_NAME, "info_hdr")
+        values = self.__driver.find_elements(By.XPATH,
+                                                "//table[@class='album_info']/tbody/tr/td")
+        #[print(i.text) for i in tags]
+        #[print(i.text) for i in values]
 
         return dic
 
-rym = RYMtags()
-driver = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()))
-print(rym.getReleaseURL(driver, "The Knife", "Silent Shout"))
+#rym = RYMtags()
+#print(rym.getReleaseURL("The Knife", "Silent Shout"))
+#rym.getTagsFromRYM("The Knife", "Silent Shout")
