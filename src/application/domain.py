@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class AudioTags(Enum):
     TITLE = "title"
     ARTIST = "artist"
@@ -15,3 +16,10 @@ class AudioTags(Enum):
     LANGUAGUE = "language"
     TRACK_NUM = "tracknumber"
     DISC_NUM = "discnumber"
+
+class RYMtags(Enum):
+    ARTIST = "Artist"
+    DATE = "Released"
+    GENRE = "Genres"
+    DESCRIPTION = "Descriptions"
+
