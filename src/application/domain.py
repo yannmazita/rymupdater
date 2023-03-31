@@ -21,5 +21,5 @@ class RYMtags(Enum):
     ARTIST = "Artist"
     DATE = "Released"
     GENRE = "Genres"
-    DESCRIPTION = "Descriptions"
+    DESCRIPTION = "Descriptors"
 
