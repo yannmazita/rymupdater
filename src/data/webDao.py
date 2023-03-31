@@ -1,4 +1,5 @@
 from src.application.domain import AudioTags
+from src.application.domain import RYMtags
 
 from urllib.parse import quote
 
@@ -10,7 +11,7 @@ from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.by import By
 
 
-class RYMtags:
+class RYMdata:
     """RYM data access"""
     def __init__(self):
         self.__driver: webdriver.Chrome = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()))
@@ -39,23 +40,38 @@ class RYMtags:
             Returns:
                 str: The URL.
         """
-        self.__driver.get(RYMtags.__getSearchURL(artist, release))
+        self.__driver.get(RYMdata.__getSearchURL(artist, release))
 
         element = self.__driver.find_element(By.CLASS_NAME, "searchpage")
         url: str = element.get_attribute("href")
         return url
 
     def getTagsFromRYM(self, artist: str, release: str) -> dict[AudioTags, str]:
+        """
+            Get release tags from firt match in RYM search.
+            Args:
+                artist: The artist to search for.
+                release: The release to search for.
+            Returns:
+
+        """
         dic = {}
         url: str = self.getReleaseURL(artist, release)
         self.__driver.get(url)
 
-        elements = self.__driver.find_elements(By.XPATH,
-                                                "//table[@class='album_info']/tbody/tr/td|//table[@class='album_info']/tbody/tr/th")
-        [print(i.text) for i in elements]
+        #album_info = self.__driver.find_element(By.XPATH, "//table[@class='album_info']/tbody")
+        #rows = album_info.find_elements(By.XPATH, "./tr")
+        rows = self.__driver.find_elements(By.XPATH, "//table[@class='album_info']/tbody/tr")
 
+        for row in rows:
+            head = row.find_element(By.CLASS_NAME, "info_hdr")  # head for current row
+            data = row.find_elements(By.TAG_NAME, "td")         # data for current row
+            try:
+                dic[RYMtags(head.text)]
+            except ValueError:
+                pass
         return dic
 
-rym = RYMtags()
+rym = RYMdata()
 print(rym.getReleaseURL("The Knife", "Silent Shout"))
 rym.getTagsFromRYM("The Knife", "Silent Shout")
