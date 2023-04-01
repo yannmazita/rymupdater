@@ -22,7 +22,7 @@ class RYMdata:
             Get search URL for artist and release.
             Args:
                 artist: The artist to search for.
-                album: The release (album/EP...) to search for.
+                release: The release (album/EP...) to search for.
             Returns:
                 str: The URL.
         """
@@ -33,7 +33,7 @@ class RYMdata:
 
     def getReleaseURL(self, artist: str, release: str) -> str:
         """
-            Get album URL from first match in RYM search.
+            Get release URL from first match in RYM search.
             Args:
                 artist: The artist to search for.
                 release: The release to search for.
@@ -75,5 +75,3 @@ class RYMdata:
 
         return dic
 
-#rym = RYMdata()
-#print(rym.getTagsFromRYM("The Knife", "Silent Shout"))
