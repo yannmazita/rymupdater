@@ -1,32 +1,28 @@
 from pathlib import Path
-from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3
+
+from src.application.domain import ID3Keys
 
 
-from src.application.domain import AudioTags
-
-
-class FileTags:
+class FileData:
     """Music file data access"""
     
     @staticmethod
-    def getTagsFromFile(path: Path) -> dict[AudioTags, str]:
+    def getTagsFromFile(path: Path) -> dict[ID3Keys, str]:
         """
         Get ID3 tags from file.
         Args:
             path: File path.
         Returns:
-            dict[str, str]: dictitonnary of tags and their corresponding value.
+            dict[ID3Keys, str]: dictitonnary of tags and their corresponding value.
         """
-        audio: EasyID3 = EasyID3(path)
-        tags: dict[AudioTags, str] = {}
-
-        for tag in AudioTags:
-            tags[tag.value] = audio[tag.value]
+        audio: ID3 = ID3(path)
+        tags: dict[ID3Keys, str] = {}
 
         return tags
 
     @staticmethod
-    def updateFileTags(path: Path, dic: dict[AudioTags, str]) -> None:
+    def updateFileTags(path: Path, dic: dict[ID3Keys, str]) -> None:
         """
         Update ID3 tags in file.
         Args:
@@ -35,7 +31,7 @@ class FileTags:
         Returns:
             None
         """
-        audio: EasyID3 = EasyID3(path)
+        audio: ID3 = ID3(path)
         for tag in dic:
             audio[tag.value] = dic[tag]
 
