@@ -6,7 +6,7 @@ from src.application.domain import ID3Keys
 
 class FileData:
     """Music file data access"""
-    
+
     @staticmethod
     def getTagsFromFile(path: Path) -> dict[ID3Keys, str]:
         """
@@ -34,5 +34,3 @@ class FileData:
         audio: ID3 = ID3(path)
         for tag in dic:
             audio[tag.value] = dic[tag]
-
-

@@ -13,32 +13,37 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class RYMdata:
     """RYM data access"""
+
     def __init__(self):
-        self.__driver: webdriver.Chrome = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()))
+        self.__driver: webdriver.Chrome = webdriver.Chrome(
+            service=ChromiumService(
+                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+            )
+        )
 
     @staticmethod
     def __getSearchURL(artist: str, release: str) -> str:
         """
-            Get search URL for artist and release.
-            Args:
-                artist: The artist to search for.
-                release: The release (album/EP...) to search for.
-            Returns:
-                str: The URL.
+        Get search URL for artist and release.
+        Args:
+            artist: The artist to search for.
+            release: The release (album/EP...) to search for.
+        Returns:
+            str: The URL.
         """
         urlStart: str = "https://rateyourmusic.com/search?searchterm="
-        #urlEnd: str = "&searchtype=l"
-        body: str = quote(artist + release, safe='')
+        # urlEnd: str = "&searchtype=l"
+        body: str = quote(artist + release, safe="")
         return urlStart + body
 
     def getReleaseURL(self, artist: str, release: str) -> str:
         """
-            Get release URL from first match in RYM search.
-            Args:
-                artist: The artist to search for.
-                release: The release to search for.
-            Returns:
-                str: The URL.
+        Get release URL from first match in RYM search.
+        Args:
+            artist: The artist to search for.
+            release: The release to search for.
+        Returns:
+            str: The URL.
         """
         self.__driver.get(RYMdata.__getSearchURL(artist, release))
 
@@ -48,27 +53,31 @@ class RYMdata:
 
     def getTagsFromRYM(self, artist: str, release: str) -> dict[RYMtags, str]:
         """
-            Get release tags from first match in RYM search.
-            Args:
-                artist: The artist to search for.
-                release: The release to search for.
-            Returns:
+        Get release tags from first match in RYM search.
+        Args:
+            artist: The artist to search for.
+            release: The release to search for.
+        Returns:
 
         """
         dic: dict[RYMtags, str] = {}
         url: str = self.getReleaseURL(artist, release)
         self.__driver.get(url)
 
-        #album_info = self.__driver.find_element(By.XPATH, "//table[@class='album_info']/tbody")
-        #rows = album_info.find_elements(By.XPATH, "./tr")
-        rows: list[WebElement] = self.__driver.find_elements(By.XPATH, "//table[@class='album_info']/tbody/tr")
+        rows: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//table[@class='album_info']/tbody/tr"
+        )
 
         for row in rows:
-            head: WebElement = row.find_element(By.CLASS_NAME, "info_hdr")  # head for current row
-            data: WebElement = row.find_element(By.TAG_NAME, "td")          # data for current row
+            head: WebElement = row.find_element(
+                By.CLASS_NAME, "info_hdr"
+            )  # head for current row
+            data: WebElement = row.find_element(
+                By.TAG_NAME, "td"
+            )  # data for current row
             try:
-                #dic[RYMtags(head.text)] = ",".join([i.text for i in data])
-                dic[RYMtags(head.text)] = data.text.replace("\n",", ")
+                # dic[RYMtags(head.text)] = ",".join([i.text for i in data])
+                dic[RYMtags(head.text)] = data.text.replace("\n", ", ")
             except ValueError:
                 # Tag is not defined in RYMtags enum.
                 pass
@@ -78,10 +87,15 @@ class RYMdata:
 
 class DiscogsData:
     """Discogs data access"""
-    def __init__(self, token: str):
-        self.__client: discogs_client.Client = discogs_client.Client(user_agent="rymupdater/0.1", user_token=token)
 
-    def getTagsFromDiscogs(self, artist: str = "", release:str= "", labelId: str = ""):
+    def __init__(self, token: str):
+        self.__client: discogs_client.Client = discogs_client.Client(
+            user_agent="rymupdater/0.1", user_token=token
+        )
+
+    def getTagsFromDiscogs(
+        self, artist: str = "", release: str = "", labelId: str = ""
+    ):
         pass
 
 
