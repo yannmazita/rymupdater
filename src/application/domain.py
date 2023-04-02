@@ -32,6 +32,7 @@ class ID3Keys(Enum):
     BPM = "TBPM"
     MEDIA = "TMED"
     COMPILATION = "TCMP"            # '0' or '1'
+    COMMENT = "COMM"
 
 
 class RYMtags(Enum):
