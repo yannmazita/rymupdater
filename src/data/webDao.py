@@ -1,12 +1,12 @@
 from src.application.domain import RYMtags
 
 from urllib.parse import quote
+import discogs_client
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromiumService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -75,3 +75,16 @@ class RYMdata:
 
         return dic
 
+
+class DiscogsData:
+    """Discogs data access"""
+    def __init__(self, token: str):
+        self.__client: discogs_client.Client = discogs_client.Client(user_agent="rymupdater/0.1", user_token=token)
+
+    def getTagsFromDiscogs(self, artist: str = "", release:str= "", labelId: str = ""):
+        pass
+
+
+token = ""  # put personal access token here
+discogs: DiscogsData = DiscogsData(token)
+discogs.getTagsFromDiscogs()
