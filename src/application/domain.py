@@ -5,24 +5,25 @@ class ID3Keys(Enum):
     TITLE = "TIT2"
     TRACK_SUBTITLE = "TIT3"
     ARTIST = "TPE1"
-    ORIGINAL_ARTIST = "TOPE"
-    BAND = "TPE2"
-    INTERPRETER_REMIXER = "TPE4"
-    INVOLVED_PEOPLE = "TIPL"
+    PERFORMER = "TOPE"              # Album artist
+    BAND = "TPE2"                   # classical music
+    CONDUCTOR = "TPE3"              # classical music
+    INTERPRETER_REMIXER = "TPE4"    # Artist intrepreting or remixing or modifying.
+    INVOLVED_PEOPLE = "TIPL"        # Engineers, producers, mixers...
     ALBUM_ARTIST = "TXXX:QuodLibet::albumartist"
     ALBUM_ARTIST_SORT_ORDER = "TSO2"
     TRACK_NUM = "TRCK"
-    DISC_NUM = "TPOS"
+    DISC_NUM = "TPOS"               # Part of set.
     ALBUM = "TALB"
     ALBUM_SORT_ORDER = "TSOA"
-    SET_SUBTITLE = "TSST"
+    DISC_SUBTITLE = "TSST"          # Set subtitle.
     RECORDING_TIME = "TDRC"
     RELEASE_TIME = "TDRL"
     GENRE = "TCON"
     DESCRIPTION = "TXXX:QuodLibet::description"
-    LANG = "TLAN"
-    COMPOSER = "TCOM"
-    COMPOSER_SORT_ORDER = "TSOC"
+    LANGUAGE = "TLAN"
+    COMPOSER = "TCOM"               # classical music
+    COMPOSER_SORT_ORDER = "TSOC"    # classical music
     LABEL = "TPUB"
     LABEL_ID = "TXXX:QuodLibet::labelid"
     MUSICIAN_CREDITS = "TMCL"
@@ -30,7 +31,7 @@ class ID3Keys(Enum):
     ISRC = "ISRC"
     BPM = "TBPM"
     MEDIA = "TMED"
-    COMPILATION = "TCMP"
+    COMPILATION = "TCMP"            # '0' or '1'
 
 
 class RYMtags(Enum):
