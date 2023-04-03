@@ -93,26 +93,35 @@ class DiscogsData:
             user_agent="rymupdater/0.1", user_token=token
         )
 
-    def getTagsFromDiscogs(
-        self, artistName: str = "", releaseName: str = "", labelId: str = ""
-    ):
+    def __getReleaseID(self, title: list[str] = [], labelID: str = "") -> str:
+        """
+        Get Discogs release ID.
+        Args:
+            title: List of ["title", "release name"].
+            labelID: Release label ID.
+        """
+        results = self.__client.search(
+            artist=title[0],
+            release_title=title[1],
+            type="release",
+            barcode=labelID,
+        )
+        releaseID: str = results.page(1)[0].id
+
+        return releaseID
+
+    def getTagsFromDiscogs(self, title: list[str] = [], labelID: str = ""):
         """
         Get release tags from first match in Discogs search.
         Args:
-            artistName: The artist to search for.
-            releaseName: The release to search for.
+            title: List of ["title", "release name"].
+            labelID: Release label ID.
         Returns:
 
         """
-        results = self.__client.search(
-            artist=artistName,
-            release_title=releaseName,
-            type="release",
-            barcode=labelId,
-        )
-        result = results.page(1)[0]
+        id = self.__getReleaseID(title, labelID)
 
 
 token = ""  # put personal access token here
 discogs: DiscogsData = DiscogsData(token)
-discogs.getTagsFromDiscogs("The Knife", "Silent Shout", "8686096500307")
+discogs.getTagsFromDiscogs(["The Knife", "Silent Shout"], "8686096500307")
