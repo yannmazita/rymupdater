@@ -1,4 +1,5 @@
 from src.application.domain import RYMtags
+from src.application.domain import ID3Keys
 
 from urllib.parse import quote
 import discogs_client
@@ -112,7 +113,9 @@ class DiscogsData:
 
         return releaseID
 
-    def getTagsFromDiscogs(self, title: list[str] = [], labelID: str = ""):
+    def getTagsFromDiscogs(
+        self, title: list[str] = [], labelID: str = ""
+    ) -> dict[ID3Keys, str]:
         """
         Get release tags from first match in Discogs search.
         Args:
@@ -121,7 +124,10 @@ class DiscogsData:
         Returns:
 
         """
+        dic: dict[ID3Keys, str] = {}
         id = self.__getReleaseID(title, labelID)
+
+        return dic
 
 
 token = ""  # put personal access token here
