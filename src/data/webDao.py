@@ -58,7 +58,7 @@ class RYMdata:
             artist: The artist to search for.
             release: The release to search for.
         Returns:
-
+            dict[RYMtags, str]: RYM tags and their value.
         """
         dic: dict[RYMtags, str] = {}
         url: str = self.getReleaseURL(artist, release)
@@ -99,6 +99,8 @@ class DiscogsData:
         Args:
             title: List of ["title", "release name"].
             labelID: Release label ID.
+        Returns:
+            str: Release ID.
         """
         results = self.__client.search(
             artist=title[0],
