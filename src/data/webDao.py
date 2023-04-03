@@ -94,11 +94,25 @@ class DiscogsData:
         )
 
     def getTagsFromDiscogs(
-        self, artist: str = "", release: str = "", labelId: str = ""
+        self, artistName: str = "", releaseName: str = "", labelId: str = ""
     ):
-        pass
+        """
+        Get release tags from first match in Discogs search.
+        Args:
+            artistName: The artist to search for.
+            releaseName: The release to search for.
+        Returns:
+
+        """
+        results = self.__client.search(
+            artist=artistName,
+            release_title=releaseName,
+            type="release",
+            barcode=labelId,
+        )
+        result = results.page(1)[0]
 
 
 token = ""  # put personal access token here
 discogs: DiscogsData = DiscogsData(token)
-discogs.getTagsFromDiscogs()
+discogs.getTagsFromDiscogs("The Knife", "Silent Shout", "8686096500307")
