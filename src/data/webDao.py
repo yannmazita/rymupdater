@@ -1,5 +1,5 @@
 from src.application.domain import RYMtags
-from src.application.domain import ID3Keys
+from src.application.domain import DiscogsTags
 
 from urllib.parse import quote
 import discogs_client
@@ -115,17 +115,18 @@ class DiscogsData:
 
     def getTagsFromDiscogs(
         self, title: list[str] = [], labelID: str = ""
-    ) -> dict[ID3Keys, str]:
+    ) -> dict[DiscogsTags, str]:
         """
         Get release tags from first match in Discogs search.
         Args:
             title: List of ["title", "release name"].
             labelID: Release label ID.
         Returns:
-
+            dict[DiscogsTags, str]: Discogs tags and their value.
         """
-        dic: dict[ID3Keys, str] = {}
+        dic: dict[DiscogsTags, str] = {}
         id = self.__getReleaseID(title, labelID)
+        release = self.__client.release(id)
 
         return dic
 
