@@ -1,8 +1,6 @@
 from src.application.domain import RYMtags
-from src.application.domain import DiscogsTags
 
 from urllib.parse import quote
-import discogs_client
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromiumService
@@ -84,53 +82,3 @@ class RYMdata:
                 pass
 
         return dic
-
-
-class DiscogsData:
-    """Discogs data access"""
-
-    def __init__(self, token: str):
-        self.__client: discogs_client.Client = discogs_client.Client(
-            user_agent="rymupdater/0.1", user_token=token
-        )
-
-    def __getReleaseID(self, title: list[str] = [], labelID: str = "") -> str:
-        """
-        Get Discogs release ID.
-        Args:
-            title: List of ["title", "release name"].
-            labelID: Release label ID.
-        Returns:
-            str: Release ID.
-        """
-        results = self.__client.search(
-            artist=title[0],
-            release_title=title[1],
-            type="release",
-            barcode=labelID,
-        )
-        releaseID: str = results.page(1)[0].id
-
-        return releaseID
-
-    def getTagsFromDiscogs(
-        self, title: list[str] = [], labelID: str = ""
-    ) -> dict[DiscogsTags, str]:
-        """
-        Get release tags from first match in Discogs search.
-        Args:
-            title: List of ["title", "release name"].
-            labelID: Release label ID.
-        Returns:
-            dict[DiscogsTags, str]: Discogs tags and their value.
-        """
-        dic: dict[DiscogsTags, str] = {}
-        id = self.__getReleaseID(title, labelID)
-        release = self.__client.release(id)
-
-        return dic
-
-
-token = ""  # put personal access token here
-discogs: DiscogsData = DiscogsData(token)
-discogs.getTagsFromDiscogs(["The Knife", "Silent Shout"], "8686096500307")
