@@ -50,7 +50,7 @@ class RYMdata:
         url: str = element.get_attribute("href")
         return url
 
-    def getTagsFromRYM(self, artist: str, release: str) -> dict[RYMtags, str]:
+    def getTagsFromAlbumInfo(self, artist: str, release: str) -> dict[RYMtags, str]:
         """
         Get release tags from first match in RYM search.
         Args:
@@ -63,11 +63,11 @@ class RYMdata:
         url: str = self.getReleaseURL(artist, release)
         self.__driver.get(url)
 
-        rows: list[WebElement] = self.__driver.find_elements(
+        albumInfoRows: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//table[@class='album_info']/tbody/tr"
         )
 
-        for row in rows:
+        for row in albumInfoRows:
             head: WebElement = row.find_element(
                 By.CLASS_NAME, "info_hdr"
             )  # head for current row
@@ -82,3 +82,11 @@ class RYMdata:
                 pass
 
         return dic
+
+    def getTagsFromIssueInfo(self, artist: str, release: str) -> dict[RYMtags, str]:
+        releases: list[WebElement] = self.__driver.find_elements(By.CLASS_NAME, "issue_info")
+        return {}
+
+
+rym = RYMdata()
+print(rym.getTagsFromAlbumInfo("The Knife", "Silent Shout"))

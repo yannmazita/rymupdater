@@ -40,3 +40,6 @@ class RYMtags(Enum):
     DATE = "Released"
     GENRE = "Genres"
     DESCRIPTION = "Descriptors"
+    LANGUAGE = "Language"
+    RECORDING_TIME = "Recorded"
+    RELEASE_TIME = "Released"
