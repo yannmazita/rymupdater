@@ -19,6 +19,11 @@ class RYMdata:
                 ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
             )
         )
+        self.__currentUrl: str = ""
+
+    def __getPage(self, url: str) -> None:
+        if self.__driver.current_url != url:
+            self.__driver.get(url)
 
     def getReleaseURL(self, artist: str, release: str) -> str:
         """
@@ -33,10 +38,11 @@ class RYMdata:
         # urlEnd: str = "&searchtype=l"
         body: str = quote(artist + release, safe="")
         searchUrl: str = urlStart + body
-        self.__driver.get(searchUrl)
+        self.__getPage(searchUrl)
 
         element = self.__driver.find_element(By.CLASS_NAME, "searchpage")
         url: str = element.get_attribute("href")
+
         return url
 
     def getTagsFromAlbumInfo(self, releaseUrl: str) -> dict[RYMtags, str]:
@@ -48,7 +54,7 @@ class RYMdata:
             dict[RYMtags, str]: RYM tags and their value.
         """
         dic: dict[RYMtags, str] = {}
-        self.__driver.get(releaseUrl)
+        self.__getPage(releaseUrl)
 
         albumInfoRows: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//table[@class='album_info']/tbody/tr"
@@ -72,4 +78,4 @@ class RYMdata:
 
 
 rym = RYMdata()
-print(rym.getTagsFromAlbumInfo(rym.getReleaseURL("The Knife", "Silent Shout")))
+# print(rym.getTagsFromAlbumInfo(rym.getReleaseURL("The Knife", "Silent Shout")))
