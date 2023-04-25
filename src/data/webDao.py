@@ -20,21 +20,6 @@ class RYMdata:
             )
         )
 
-    @staticmethod
-    def __getSearchURL(artist: str, release: str) -> str:
-        """
-        Get search URL for artist and release.
-        Args:
-            artist: The artist to search for.
-            release: The release (album/EP...) to search for.
-        Returns:
-            str: The URL.
-        """
-        urlStart: str = "https://rateyourmusic.com/search?searchterm="
-        # urlEnd: str = "&searchtype=l"
-        body: str = quote(artist + release, safe="")
-        return urlStart + body
-
     def getReleaseURL(self, artist: str, release: str) -> str:
         """
         Get release URL from first match in RYM search.
@@ -44,24 +29,26 @@ class RYMdata:
         Returns:
             str: The URL.
         """
-        self.__driver.get(RYMdata.__getSearchURL(artist, release))
+        urlStart: str = "https://rateyourmusic.com/search?searchterm="
+        # urlEnd: str = "&searchtype=l"
+        body: str = quote(artist + release, safe="")
+        searchUrl: str = urlStart + body
+        self.__driver.get(searchUrl)
 
         element = self.__driver.find_element(By.CLASS_NAME, "searchpage")
         url: str = element.get_attribute("href")
         return url
 
-    def getTagsFromAlbumInfo(self, artist: str, release: str) -> dict[RYMtags, str]:
+    def getTagsFromAlbumInfo(self, releaseUrl: str) -> dict[RYMtags, str]:
         """
         Get release tags from first match in RYM search.
         Args:
-            artist: The artist to search for.
-            release: The release to search for.
+            releaseUrl: The URL of the release to search for.
         Returns:
             dict[RYMtags, str]: RYM tags and their value.
         """
         dic: dict[RYMtags, str] = {}
-        url: str = self.getReleaseURL(artist, release)
-        self.__driver.get(url)
+        self.__driver.get(releaseUrl)
 
         albumInfoRows: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//table[@class='album_info']/tbody/tr"
@@ -83,10 +70,6 @@ class RYMdata:
 
         return dic
 
-    def getTagsFromIssueInfo(self, artist: str, release: str) -> dict[RYMtags, str]:
-        releases: list[WebElement] = self.__driver.find_elements(By.CLASS_NAME, "issue_info")
-        return {}
-
 
 rym = RYMdata()
-print(rym.getTagsFromAlbumInfo("The Knife", "Silent Shout"))
+print(rym.getTagsFromAlbumInfo(rym.getReleaseURL("The Knife", "Silent Shout")))
