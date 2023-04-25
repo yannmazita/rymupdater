@@ -8,6 +8,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.relative_locator import locate_with
+from selenium.common.exceptions import NoSuchElementException
 
 
 class RYMdata:
@@ -19,7 +21,6 @@ class RYMdata:
                 ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
             )
         )
-        self.__currentUrl: str = ""
 
     def __getPage(self, url: str) -> None:
         if self.__driver.current_url != url:
@@ -76,6 +77,39 @@ class RYMdata:
 
         return dic
 
+    def getIssueURLs(self, releaseUrl: str) -> list[str]:
+        """
+        Get URLs for every issue of given release.
+        Args:
+            releaseUrl: The URL of the release to search for.
+        Returns:
+            list[str]: List of URLs.
+        """
+        self.__getPage(releaseUrl)
+        urls: list[str] = []
+        issues: list[WebElement] = self.__driver.find_elements(
+            By.CLASS_NAME, "issue_title"
+        )
+
+        flag: bool = False
+        for issue in issues:
+            element: WebElement = issue.find_element(By.CLASS_NAME, "sametitle")
+            # With these locators the URLs are found twice in the DOM.
+            # This try/except block allows to go through the first occurences of the URLs.
+            try:
+                primaryIndicator: WebElement = issue.find_element(
+                    By.CLASS_NAME, "primary_indicator"
+                )
+                if flag:
+                    break
+                else:
+                    flag = True
+            except NoSuchElementException:
+                pass
+            urls.append(element.get_attribute("href"))
+
+        return urls
+
 
 rym = RYMdata()
-# print(rym.getTagsFromAlbumInfo(rym.getReleaseURL("The Knife", "Silent Shout")))
+# print(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout")))
