@@ -142,8 +142,4 @@ class RYMdata:
 
 
 rym = RYMdata()
-print(
-    rym.getIssueTracklist(
-        rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]
-    )
-)
+# print(rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
