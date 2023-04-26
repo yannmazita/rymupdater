@@ -111,6 +111,13 @@ class RYMdata:
         return urls
 
     def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
+        """
+        Get tracklist from issue URL.
+        Args:
+            issueUrl: The URL of the issue.
+        Returns:
+            dict[str, str]: Dictionnary of tracklist numbers and tracklist titles.
+        """
         dic: dict[str, str] = {}
         self.__getPage(issueUrl)
         tracks: list[WebElement] = self.__driver.find_elements(
