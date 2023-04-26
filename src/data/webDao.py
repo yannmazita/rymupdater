@@ -110,6 +110,26 @@ class RYMdata:
 
         return urls
 
+    def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
+        dic: dict[str, str] = {}
+        self.__getPage(issueUrl)
+        tracks: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//div[@itemprop='track']"
+        )
+
+        for track in tracks:
+            tracklistNum: WebElement = track.find_element(
+                By.XPATH, "./span[@class='tracklist_num']"
+            )
+            tracklistTitle: WebElement = track.find_element(
+                By.XPATH,
+                "./span[@class='tracklist_title']/span[@itemprop='name']/span[@class='rendered_text']",
+            )
+            dic[tracklistNum.get_attribute("innerText")] = tracklistTitle.get_attribute(
+                "innerText"
+            )
+        return dic
+
 
 rym = RYMdata()
-# print(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout")))
+# rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
