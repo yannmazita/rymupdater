@@ -132,6 +132,7 @@ class RYMdata:
                 By.XPATH,
                 "./span[@class='tracklist_title']/span[@itemprop='name']/span[@class='rendered_text']",
             )
+            # For some reason using .text on spans returns empty strings.
             tracklist.append(
                 (
                     tracklistNum.get_attribute("innerText"),
@@ -140,6 +141,25 @@ class RYMdata:
             )
         return tracklist
 
+    def getMainCredits(self, issueUrl: str) -> list[tuple[str, list[str]]]:
+        mainCredits: list[tuple[str, list[str]]] = []
+        self.__getPage(issueUrl)
+        creds: list[WebElement] = self.__driver.find_elements(By.XPATH, "//ul[@id='credits_']/li")
+
+        for credit in creds:
+            try:
+                # Credited artist has a link to their RYM page
+                artist: WebElement = credit.find_element(By.CLASS_NAME, "artist")
+            except NoSuchElementException:
+                # Credited artist doesn't have a link to their RYM page
+                artist: WebElement = credit.find_element(By.TAG_NAME, "span")
+
+            rawRoles: list[WebElement] = credit.find_elements(By.CLASS_NAME, "role_name")
+            roles: list[str] = [role.get_attribute("innerText") for role in rawRoles]
+            mainCredits.append((artist.get_attribute("innerText"), roles))
+
+        return mainCredits
+
 
 rym = RYMdata()
-# print(rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
