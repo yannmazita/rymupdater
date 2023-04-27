@@ -142,9 +142,18 @@ class RYMdata:
         return tracklist
 
     def getMainCredits(self, issueUrl: str) -> list[tuple[str, list[str]]]:
+        """
+            Get main credits from issue URL.
+            Args:
+                issueUrl: The URL of the issue.
+            Returns:
+                list[tuple[str, list[str]]]: Main credits
+        """
         mainCredits: list[tuple[str, list[str]]] = []
         self.__getPage(issueUrl)
-        creds: list[WebElement] = self.__driver.find_elements(By.XPATH, "//ul[@id='credits_']/li")
+        creds: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//ul[@id='credits_']/li"
+        )
 
         for credit in creds:
             try:
@@ -154,7 +163,9 @@ class RYMdata:
                 # Credited artist doesn't have a link to their RYM page
                 artist: WebElement = credit.find_element(By.TAG_NAME, "span")
 
-            rawRoles: list[WebElement] = credit.find_elements(By.CLASS_NAME, "role_name")
+            rawRoles: list[WebElement] = credit.find_elements(
+                By.CLASS_NAME, "role_name"
+            )
             roles: list[str] = [role.get_attribute("innerText") for role in rawRoles]
             mainCredits.append((artist.get_attribute("innerText"), roles))
 
