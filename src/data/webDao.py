@@ -88,25 +88,25 @@ class RYMdata:
         self.__getPage(releaseUrl)
         urls: list[str] = []
         issues: list[WebElement] = self.__driver.find_elements(
-            By.CLASS_NAME, "issue_title"
+            By.XPATH, "//span[@class='issue_title']/a"
         )
+        testList = []
 
-        flag: bool = False
-        for issue in issues:
-            element: WebElement = issue.find_element(By.CLASS_NAME, "sametitle")
-            # With these locators the URLs are found twice in the DOM.
-            # This try/except block allows to go through the first occurences of the URLs.
+        # for some reason release 15 (between relase 4 and 10 in DOM) gets skipped
+        for issueNb in range(0, len(issues) // 2):
+            link: str = issues[issueNb].get_attribute("href")
+            print(issues[issueNb].get_attribute("href"))
+            urls.append(issues[issueNb].get_attribute("href"))
             try:
-                primaryIndicator: WebElement = issue.find_element(
-                    By.CLASS_NAME, "primary_indicator"
-                )
-                if flag:
-                    break
-                else:
-                    flag = True
-            except NoSuchElementException:
+                testList.append(link[-3] + link[-2])
+            except TypeError:
                 pass
-            urls.append(element.get_attribute("href"))
+
+        print(len(urls))
+        print(testList)
+        testList.sort()
+        print(testList)
+        print(issues[17].get_attribute("href"))
 
         return urls
 
@@ -173,4 +173,5 @@ class RYMdata:
 
 
 rym = RYMdata()
-# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+#print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
