@@ -159,7 +159,7 @@ class RYMdata:
                 ] = tracklistTitle.get_attribute("innerText")
         return tracklist
 
-    def getMainCredits(self, issueUrl: str) -> dict[str, list[str]]:
+    def getMainCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
         """
         Get main credits from issue URL.
         Args:
@@ -167,7 +167,7 @@ class RYMdata:
         Returns:
             list[tuple[str, list[str]]]: Main credits
         """
-        mainCredits: dict[str, list[str]] = {}
+        mainCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
         creds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
@@ -184,7 +184,24 @@ class RYMdata:
             rawRoles: list[WebElement] = credit.find_elements(
                 By.CLASS_NAME, "role_name"
             )
-            roles: list[str] = [role.get_attribute("innerText") for role in rawRoles]
-            mainCredits[artist.get_attribute("innerText")] = roles
+            roles: dict[str, list[str]] = {}
+            for role in rawRoles:
+                try:
+                    rawTracks: list[WebElement] = role.find_elements(
+                        By.CLASS_NAME, "role_tracks"
+                    )
+                    roles[role.get_attribute("innerText")] = [
+                        track.get_attribute("innerText") for track in rawTracks
+                    ]
+                except NoSuchElementException:
+                    roles[role.get_attribute("innerText")] = ["No track"]
+
+            if artist.get_attribute("id") != "track_minor_show_":
+                mainCredits[artist.get_attribute("innerText")] = roles
 
         return mainCredits
+
+
+# rym = RYMdata()
+# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
