@@ -123,7 +123,7 @@ class RYMdata:
 
         return urls
 
-    def getIssueTracklist(self, issueUrl: str) -> list[tuple[str, str]]:
+    def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
         """
         Get tracklist from issue URL.
         Args:
@@ -131,27 +131,32 @@ class RYMdata:
         Returns:
             dict[str, str]: Dictionnary of tracklist numbers and tracklist titles.
         """
-        tracklist: list[tuple[str, str]] = []
+        tracklist: dict[str, str] = {}
         self.__getPage(issueUrl)
         tracks: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//div[@itemprop='track']"
         )
+        discNumber: int = 0
 
         for track in tracks:
             tracklistNum: WebElement = track.find_element(
                 By.XPATH, "./span[@class='tracklist_num']"
             )
+            # For some reason using .text on spans returns empty strings.
             tracklistTitle: WebElement = track.find_element(
                 By.XPATH,
                 "./span[@class='tracklist_title']/span[@itemprop='name']/span[@class='rendered_text']",
             )
-            # For some reason using .text on spans returns empty strings.
-            tracklist.append(
-                (
-                    tracklistNum.get_attribute("innerText"),
-                    tracklistTitle.get_attribute("innerText"),
+
+            if tracklistNum.get_attribute("innerText") == "":
+                # Disc titles do not have tracklist numbers.
+                tracklist[f"Disc: {discNumber + 1}"] = tracklistTitle.get_attribute(
+                    "innerText"
                 )
-            )
+            else:
+                tracklist[
+                    tracklistNum.get_attribute("innerText")
+                ] = tracklistTitle.get_attribute("innerText")
         return tracklist
 
     def getMainCredits(self, issueUrl: str) -> list[tuple[str, list[str]]]:
@@ -187,4 +192,4 @@ class RYMdata:
 
 # rym = RYMdata()
 # print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
-# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
+# print(rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
