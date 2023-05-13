@@ -159,7 +159,7 @@ class RYMdata:
                 ] = tracklistTitle.get_attribute("innerText")
         return tracklist
 
-    def getMainCredits(self, issueUrl: str) -> list[tuple[str, list[str]]]:
+    def getMainCredits(self, issueUrl: str) -> dict[str, list[str]]:
         """
         Get main credits from issue URL.
         Args:
@@ -167,7 +167,7 @@ class RYMdata:
         Returns:
             list[tuple[str, list[str]]]: Main credits
         """
-        mainCredits: list[tuple[str, list[str]]] = []
+        mainCredits: dict[str, list[str]] = {}
         self.__getPage(issueUrl)
         creds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
@@ -185,11 +185,6 @@ class RYMdata:
                 By.CLASS_NAME, "role_name"
             )
             roles: list[str] = [role.get_attribute("innerText") for role in rawRoles]
-            mainCredits.append((artist.get_attribute("innerText"), roles))
+            mainCredits[artist.get_attribute("innerText")] = roles
 
         return mainCredits
-
-
-# rym = RYMdata()
-# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
-# print(rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
