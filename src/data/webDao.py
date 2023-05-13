@@ -8,7 +8,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.relative_locator import locate_with
 from selenium.common.exceptions import NoSuchElementException
 
 
@@ -186,22 +185,14 @@ class RYMdata:
             )
             roles: dict[str, list[str]] = {}
             for role in rawRoles:
-                try:
-                    rawTracks: list[WebElement] = role.find_elements(
-                        By.CLASS_NAME, "role_tracks"
-                    )
-                    roles[role.get_attribute("innerText")] = [
-                        track.get_attribute("innerText") for track in rawTracks
-                    ]
-                except NoSuchElementException:
-                    roles[role.get_attribute("innerText")] = ["No track"]
+                rawTracks: list[WebElement] = role.find_elements(
+                    By.CLASS_NAME, "role_tracks"
+                )
+                roles[role.get_attribute("innerText")] = [
+                    track.get_attribute("innerText") for track in rawTracks
+                ]
 
             if artist.get_attribute("id") != "track_minor_show_":
                 mainCredits[artist.get_attribute("innerText")] = roles
 
         return mainCredits
-
-
-# rym = RYMdata()
-# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
-# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
