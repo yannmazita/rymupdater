@@ -158,15 +158,15 @@ class RYMdata:
                 ] = tracklistTitle.get_attribute("innerText")
         return tracklist
 
-    def getMainCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
+    def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
         """
-        Get main credits from issue URL.
+        Get credits from issue URL.
         Args:
             issueUrl: The URL of the issue.
         Returns:
-            list[tuple[str, list[str]]]: Main credits
+            dict[str, dict[str, list[str]]]: Issue credits
         """
-        mainCredits: dict[str, dict[str, list[str]]] = {}
+        issueCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
         creds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
@@ -192,7 +192,8 @@ class RYMdata:
                     track.get_attribute("innerText") for track in rawTracks
                 ]
 
+            # track_minor_show_ class elements are not artist names.
             if artist.get_attribute("id") != "track_minor_show_":
-                mainCredits[artist.get_attribute("innerText")] = roles
+                issueCredits[artist.get_attribute("innerText")] = roles
 
-        return mainCredits
+        return issueCredits
