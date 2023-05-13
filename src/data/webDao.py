@@ -45,37 +45,6 @@ class RYMdata:
 
         return url
 
-    def getTagsFromAlbumInfo(self, releaseUrl: str) -> dict[RYMtags, str]:
-        """
-        Get release tags from first match in RYM search.
-        Args:
-            releaseUrl: The URL of the release to search for.
-        Returns:
-            dict[RYMtags, str]: RYM tags and their value.
-        """
-        dic: dict[RYMtags, str] = {}
-        self.__getPage(releaseUrl)
-
-        albumInfoRows: list[WebElement] = self.__driver.find_elements(
-            By.XPATH, "//table[@class='album_info']/tbody/tr"
-        )
-
-        for row in albumInfoRows:
-            head: WebElement = row.find_element(
-                By.CLASS_NAME, "info_hdr"
-            )  # head for current row
-            data: WebElement = row.find_element(
-                By.TAG_NAME, "td"
-            )  # data for current row
-            try:
-                # dic[RYMtags(head.text)] = ",".join([i.text for i in data])
-                dic[RYMtags(head.text)] = data.text.replace("\n", ", ")
-            except ValueError:
-                # Tag is not defined in RYMtags enum.
-                pass
-
-        return dic
-
     def getIssueURLs(self, releaseUrl: str) -> list[str]:
         """
         Get URLs for every issue of given release.
@@ -121,6 +90,36 @@ class RYMdata:
                 urls.append(link)
 
         return urls
+
+    def getIssueTags(self, issueUrl: str) -> dict[RYMtags, str]:
+        """
+        Get tags from issue URL.
+        Args:
+            issueUrl: The URL of the issue.
+        Returns:
+            dict[RYMtags, str]: RYM tags and their value.
+        """
+        dic: dict[RYMtags, str] = {}
+        self.__getPage(issueUrl)
+
+        albumInfoRows: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//table[@class='album_info']/tbody/tr"
+        )
+
+        for row in albumInfoRows:
+            head: WebElement = row.find_element(
+                By.CLASS_NAME, "info_hdr"
+            )  # head for current row
+            data: WebElement = row.find_element(
+                By.TAG_NAME, "td"
+            )  # data for current row
+            try:
+                dic[RYMtags(head.text)] = data.text.replace("\n", ", ")
+            except ValueError:
+                # Tag is not defined in RYMtags enum.
+                pass
+
+        return dic
 
     def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
         """
