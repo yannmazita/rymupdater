@@ -8,7 +8,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.relative_locator import locate_with
 from selenium.common.exceptions import NoSuchElementException
 
 
@@ -93,10 +92,8 @@ class RYMdata:
 
         flag: bool = False
         for issue in issues:
-            element: WebElement = issue.find_element(By.CLASS_NAME, "sametitle")
-            # With these locators the URLs are found twice in the DOM.
-            # This try/except block allows to go through the first occurences of the URLs.
             try:
+                # issues contains the same elements twice, this block avoids iterating twice
                 primaryIndicator: WebElement = issue.find_element(
                     By.CLASS_NAME, "primary_indicator"
                 )
@@ -106,11 +103,26 @@ class RYMdata:
                     flag = True
             except NoSuchElementException:
                 pass
-            urls.append(element.get_attribute("href"))
+
+            try:
+                # Some issue urls (like unauthorized issues) may not be found
+                # in the "sametitle" class.
+                element: WebElement = issue.find_element(By.CLASS_NAME, "sametitle")
+                link: str = element.get_attribute("href")
+                if link is None:
+                    # If the current webdriver url is equal to the current issue url,
+                    # there is no link to click on and link is None.
+                    urls.append(self.__driver.current_url)
+                else:
+                    urls.append(link)
+            except NoSuchElementException:
+                element: WebElement = issue.find_element(By.TAG_NAME, "a")
+                link: str = element.get_attribute("href")
+                urls.append(link)
 
         return urls
 
-    def getIssueTracklist(self, issueUrl: str) -> list[tuple[str, str]]:
+    def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
         """
         Get tracklist from issue URL.
         Args:
@@ -118,38 +130,43 @@ class RYMdata:
         Returns:
             dict[str, str]: Dictionnary of tracklist numbers and tracklist titles.
         """
-        tracklist: list[tuple[str, str]] = []
+        tracklist: dict[str, str] = {}
         self.__getPage(issueUrl)
         tracks: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//div[@itemprop='track']"
         )
+        discNumber: int = 0
 
         for track in tracks:
             tracklistNum: WebElement = track.find_element(
                 By.XPATH, "./span[@class='tracklist_num']"
             )
+            # For some reason using .text on spans returns empty strings.
             tracklistTitle: WebElement = track.find_element(
                 By.XPATH,
                 "./span[@class='tracklist_title']/span[@itemprop='name']/span[@class='rendered_text']",
             )
-            # For some reason using .text on spans returns empty strings.
-            tracklist.append(
-                (
-                    tracklistNum.get_attribute("innerText"),
-                    tracklistTitle.get_attribute("innerText"),
+
+            if tracklistNum.get_attribute("innerText") == "":
+                # Disc titles do not have tracklist numbers.
+                tracklist[f"Disc: {discNumber + 1}"] = tracklistTitle.get_attribute(
+                    "innerText"
                 )
-            )
+            else:
+                tracklist[
+                    tracklistNum.get_attribute("innerText")
+                ] = tracklistTitle.get_attribute("innerText")
         return tracklist
 
-    def getMainCredits(self, issueUrl: str) -> list[tuple[str, list[str]]]:
+    def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
         """
-            Get main credits from issue URL.
-            Args:
-                issueUrl: The URL of the issue.
-            Returns:
-                list[tuple[str, list[str]]]: Main credits
+        Get credits from issue URL.
+        Args:
+            issueUrl: The URL of the issue.
+        Returns:
+            dict[str, dict[str, list[str]]]: Issue credits
         """
-        mainCredits: list[tuple[str, list[str]]] = []
+        issueCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
         creds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
@@ -166,11 +183,17 @@ class RYMdata:
             rawRoles: list[WebElement] = credit.find_elements(
                 By.CLASS_NAME, "role_name"
             )
-            roles: list[str] = [role.get_attribute("innerText") for role in rawRoles]
-            mainCredits.append((artist.get_attribute("innerText"), roles))
+            roles: dict[str, list[str]] = {}
+            for role in rawRoles:
+                rawTracks: list[WebElement] = role.find_elements(
+                    By.CLASS_NAME, "role_tracks"
+                )
+                roles[role.get_attribute("innerText")] = [
+                    track.get_attribute("innerText") for track in rawTracks
+                ]
 
-        return mainCredits
+            # track_minor_show_ class elements are not artist names.
+            if artist.get_attribute("id") != "track_minor_show_":
+                issueCredits[artist.get_attribute("innerText")] = roles
 
-
-rym = RYMdata()
-# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+        return issueCredits
