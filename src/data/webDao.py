@@ -88,25 +88,38 @@ class RYMdata:
         self.__getPage(releaseUrl)
         urls: list[str] = []
         issues: list[WebElement] = self.__driver.find_elements(
-            By.XPATH, "//span[@class='issue_title']/a"
+            By.CLASS_NAME, "issue_title"
         )
-        testList = []
 
-        # for some reason release 15 (between relase 4 and 10 in DOM) gets skipped
-        for issueNb in range(0, len(issues) // 2):
-            link: str = issues[issueNb].get_attribute("href")
-            print(issues[issueNb].get_attribute("href"))
-            urls.append(issues[issueNb].get_attribute("href"))
+        flag: bool = False
+        for issue in issues:
             try:
-                testList.append(link[-3] + link[-2])
-            except TypeError:
+                # issues contains the same elements twice, this block avoids iterating twice
+                primaryIndicator: WebElement = issue.find_element(
+                    By.CLASS_NAME, "primary_indicator"
+                )
+                if flag:
+                    break
+                else:
+                    flag = True
+            except NoSuchElementException:
                 pass
 
-        print(len(urls))
-        print(testList)
-        testList.sort()
-        print(testList)
-        print(issues[17].get_attribute("href"))
+            try:
+                # Some issue urls (like unauthorized issues) may not be found
+                # in the "sametitle" class.
+                element: WebElement = issue.find_element(By.CLASS_NAME, "sametitle")
+                link: str = element.get_attribute("href")
+                if link is None:
+                    # If the current webdriver url is equal to the current issue url,
+                    # there is no link to click on and link is None.
+                    urls.append(self.__driver.current_url)
+                else:
+                    urls.append(link)
+            except NoSuchElementException:
+                element: WebElement = issue.find_element(By.TAG_NAME, "a")
+                link: str = element.get_attribute("href")
+                urls.append(link)
 
         return urls
 
@@ -143,11 +156,11 @@ class RYMdata:
 
     def getMainCredits(self, issueUrl: str) -> list[tuple[str, list[str]]]:
         """
-            Get main credits from issue URL.
-            Args:
-                issueUrl: The URL of the issue.
-            Returns:
-                list[tuple[str, list[str]]]: Main credits
+        Get main credits from issue URL.
+        Args:
+            issueUrl: The URL of the issue.
+        Returns:
+            list[tuple[str, list[str]]]: Main credits
         """
         mainCredits: list[tuple[str, list[str]]] = []
         self.__getPage(issueUrl)
@@ -172,6 +185,6 @@ class RYMdata:
         return mainCredits
 
 
-rym = RYMdata()
-#print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
-print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
+# rym = RYMdata()
+# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+# print(rym.getMainCredits(rym.getIssueURLs(rym.getReleaseURL("The Smashing Pumpkins", "Mellon Collie and the Infinite Sadness"))[0]))
