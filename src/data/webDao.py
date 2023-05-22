@@ -12,9 +12,17 @@ from selenium.common.exceptions import NoSuchElementException
 
 
 class RYMdata:
-    """RYM data access"""
+    """RYM data access.
+
+    A RYMdata instance is used as a data access object (DAO) to be used elsewhere.
+    Any service requiring access to rateyourmusic.com should be implemented in this class.
+    A release is merely an artist name and single/EP/album etc name. Each release has at lease one
+    issue. Issues of the same release can have different tracks, label IDs etc.
+    """
 
     def __init__(self):
+        """Initiliazes the instance.
+        """
         self.__driver: webdriver.Chrome = webdriver.Chrome(
             service=ChromiumService(
                 ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
@@ -26,13 +34,13 @@ class RYMdata:
             self.__driver.get(url)
 
     def getReleaseURL(self, artist: str, release: str) -> str:
-        """
-        Get release URL from first match in RYM search.
+        """Gets release URL from first match in RYM search.
+
         Args:
-            artist: The artist to search for.
-            release: The release to search for.
+            artist: The name of the artist to search for.
+            release: The name of the release to search for.
         Returns:
-            str: The URL.
+            The URL of the release.
         """
         urlStart: str = "https://rateyourmusic.com/search?searchterm="
         # urlEnd: str = "&searchtype=l"
@@ -46,12 +54,12 @@ class RYMdata:
         return url
 
     def getIssueURLs(self, releaseUrl: str) -> list[str]:
-        """
-        Get URLs for every issue of given release.
+        """Gets URLs for every issue of given release.
+
         Args:
             releaseUrl: The URL of the release to search for.
         Returns:
-            list[str]: List of URLs.
+            A list of URLs.
         """
         self.__getPage(releaseUrl)
         urls: list[str] = []
@@ -92,12 +100,19 @@ class RYMdata:
         return urls
 
     def getIssueTags(self, issueUrl: str) -> dict[RYMtags, str]:
-        """
-        Get tags from issue URL.
+        """Gets tags from issue URL.
+
         Args:
             issueUrl: The URL of the issue.
         Returns:
-            dict[RYMtags, str]: RYM tags and their value.
+            A dictionnary {key: value} where key is a RYMtags member and value its
+            corresponding value. For example the primary issue of The Knife - Silent Shout":
+
+                {<RYMtags.ARTIST: 'Artist'>: 'The Knife',
+                 <RYMtags.DATE: 'Released'>: '20 March 2006',
+                 <RYMtags.RECORDING_TIME: 'Recorded'>: 'March 2004 - November 2005',
+                 ...,
+                 <RYMtags.LANGUAGE: 'Language'>: 'English'}
         """
         dic: dict[RYMtags, str] = {}
         self.__getPage(issueUrl)
@@ -121,13 +136,16 @@ class RYMdata:
 
         return dic
 
+    # Only gets the tracklist for the 3rd CD for the issue 9 (4 on RYM) of "The Knife - Silent Shout"
     def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
-        """
-        Get tracklist from issue URL.
+        """Gets tracklist from issue URL.
+
         Args:
             issueUrl: The URL of the issue.
         Returns:
-            dict[str, str]: Dictionnary of tracklist numbers and tracklist titles.
+            A dictionnary {key: value} where key is a tracklist number and value a track name.
+            For example the primary issue of "The Knife - Silent Shout":
+
         """
         tracklist: dict[str, str] = {}
         self.__getPage(issueUrl)
@@ -146,24 +164,45 @@ class RYMdata:
                 "./span[@class='tracklist_title']/span[@itemprop='name']/span[@class='rendered_text']",
             )
 
-            if tracklistNum.get_attribute("innerText") == "":
-                # Disc titles do not have tracklist numbers.
-                tracklist[f"Disc: {discNumber + 1}"] = tracklistTitle.get_attribute(
-                    "innerText"
-                )
+            # Track titles always have tracklist numbers and disc titles are always bold.
+            # For example, if on the same disc, track 1-10 are regular audio files and track 11-22
+            # are music videos then the ul where div[@itemprop='track'] elements are found will
+            # feature a "track" (ie: li[@class='track']/div[@itemprop='track'])
+            # between tracks 1-10 and 11-22 without a track number and with
+            # italic inner text (not bold).
+            # Such "tracks" are ignored.
+            trackNumInnerText: str = tracklistNum.get_attribute("innerText").strip()
+            trackTitleInnerText: str = tracklistTitle.get_attribute("innerText")
+            element: WebElement | None = None
+            if not trackNumInnerText:
+                try:
+                    element = tracklistTitle.find_element(By.TAG_NAME, "b")
+                except NoSuchElementException:
+                    pass
+                if element is not None:
+                    discNumber += 1
+                    tracklist[f"Disc: {discNumber}"] = trackTitleInnerText
             else:
-                tracklist[
-                    tracklistNum.get_attribute("innerText")
-                ] = tracklistTitle.get_attribute("innerText")
+                # rateyourmusic track numbers may not have the format
+                # '{disc number}.{track number}'
+                if discNumber != 0 and trackNumInnerText.isdigit():
+                    tracklist[f"{discNumber}.{trackNumInnerText}"] = trackTitleInnerText
+                else:
+                    tracklist[trackNumInnerText] = trackTitleInnerText
+
         return tracklist
 
     def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
-        """
-        Get credits from issue URL.
+        """Get credits from issue URL.
+
         Args:
             issueUrl: The URL of the issue.
         Returns:
             dict[str, dict[str, list[str]]]: Issue credits
+            A nested dictionnary {artist, {tracks, role}} where artist is an artist name,
+            tracks is the tracks where the artist is credited and role is the credited role.
+            For example the primary issue of "The Knife - Silent Shout":
+
         """
         issueCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
@@ -196,3 +235,7 @@ class RYMdata:
                 issueCredits[artist.get_attribute("innerText")] = roles
 
         return issueCredits
+
+
+rym = RYMdata()
+print(rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
