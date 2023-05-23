@@ -21,8 +21,7 @@ class RYMdata:
     """
 
     def __init__(self):
-        """Initiliazes the instance.
-        """
+        """Initiliazes the instance."""
         self.__driver: webdriver.Chrome = webdriver.Chrome(
             service=ChromiumService(
                 ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
@@ -56,11 +55,33 @@ class RYMdata:
     def getIssueURLs(self, releaseUrl: str) -> list[str]:
         """Gets URLs for every issue of given release.
 
+        Each issue of a given release has a URL ending either with its own number or
+        '.p' indicating it is the primary issue. The primary issue url is not the main
+        url (without any suffix).
+
         Args:
             releaseUrl: The URL of the release to search for.
         Returns:
-            A list of URLs.
+            A list of URLs. For example for the release 'The Knife - Silent Shout':
+
+                [
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout.p/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-3/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-6/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-7/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-2/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-1/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-5/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-8/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-9/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-4/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-12/",
+                ]
+
+            Note that issues 10 and 11 are missing, they both redirect to the main URL:
+                "https://rateyourmusic.com/release/album/the-knife/silent-shout"
         """
+
         self.__getPage(releaseUrl)
         urls: list[str] = []
         issues: list[WebElement] = self.__driver.find_elements(
@@ -114,6 +135,7 @@ class RYMdata:
                  ...,
                  <RYMtags.LANGUAGE: 'Language'>: 'English'}
         """
+
         dic: dict[RYMtags, str] = {}
         self.__getPage(issueUrl)
 
@@ -136,7 +158,6 @@ class RYMdata:
 
         return dic
 
-    # Only gets the tracklist for the 3rd CD for the issue 9 (4 on RYM) of "The Knife - Silent Shout"
     def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
         """Gets tracklist from issue URL.
 
@@ -144,9 +165,24 @@ class RYMdata:
             issueUrl: The URL of the issue.
         Returns:
             A dictionnary {key: value} where key is a tracklist number and value a track name.
-            For example the primary issue of "The Knife - Silent Shout":
+            For example the BRILCD103DLX issue of "The Knife - Silent Shout":
 
+                {
+                    "Disc: 1": "Disk I - Silent Shout",
+                    "1.1": "Silent Shout",
+                    "1.2": "Neverland",
+                    ...,
+                    "Disc: 2": "Disk II - Silent Shout an Audiovisual Experience (Live Audio)",
+                    "2.1": "Pass This On",
+                    "2.2": "The Captain",
+                    ...,
+                    "Disc: 3": "Disk III - Silent Shout an Audiovisual Experience (DVD) Live Recording in 5.1",
+                    "3.1": "Pass This On",
+                    ...,
+                    "3.22": "When I Found the Knife (Short Film)",
+                }
         """
+
         tracklist: dict[str, str] = {}
         self.__getPage(issueUrl)
         tracks: list[WebElement] = self.__driver.find_elements(
@@ -192,18 +228,20 @@ class RYMdata:
 
         return tracklist
 
+    # Mellon Collie works but both primary issue url and main url don't work with Silent Shout (empty tracks)
     def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
         """Get credits from issue URL.
 
         Args:
             issueUrl: The URL of the issue.
         Returns:
-            dict[str, dict[str, list[str]]]: Issue credits
-            A nested dictionnary {artist, {tracks, role}} where artist is an artist name,
-            tracks is the tracks where the artist is credited and role is the credited role.
-            For example the primary issue of "The Knife - Silent Shout":
+            A nested dictionnary {artist, {role, tracks}} where artist is an artist name,
+            role is the credited role and tracks is a list of tracks where the artist is credited.
+            When tracks is empty, it assumed that the artist has the given role on every track.
+            For example the main URL (not primary) of "The Knife - Silent Shout":
 
         """
+
         issueCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
         creds: list[WebElement] = self.__driver.find_elements(
@@ -238,4 +276,6 @@ class RYMdata:
 
 
 rym = RYMdata()
-print(rym.getIssueTracklist(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[9]))
+print(rym.getIssueCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
+# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-knife/silent-shout"))
+# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
