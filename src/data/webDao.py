@@ -229,20 +229,21 @@ class RYMdata:
         return tracklist
 
     # minor_credits_ forgotten
-    def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
+    def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, str]]:
         """Get credits from issue URL.
 
         Args:
             issueUrl: The URL of the issue.
         Returns:
             A nested dictionnary {artist, {role, tracks}} where artist is an artist name,
-            role is the credited role and tracks is a list of tracks where the artist is credited.
+            role is the credited role and tracks is a string of tracks
+            where the artist is credited.
             When tracks is empty, it assumed that the artist has the given role on every track.
             For example the main URL (not primary) of "The Knife - Silent Shout":
 
         """
 
-        issueCredits: dict[str, dict[str, list[str]]] = {}
+        issueCredits: dict[str, dict[str, str]] = {}
         self.__getPage(issueUrl)
         mainCreds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
@@ -267,18 +268,20 @@ class RYMdata:
             rawRoles: list[WebElement] = credit.find_elements(
                 By.CLASS_NAME, "role_name"
             )
-            roles: dict[str, list[str]] = {}
+            roles: dict[str, str] = {}
             for role in rawRoles:
-                rawTracks: list[WebElement] = role.find_elements(
-                    By.CLASS_NAME, "role_tracks"
-                )
-                # Some times, track numbers get appended to the role name in minor credits.
-                # the HTML is as follows
-                # <span class=role_name>role<span class=role_tracks>tracknumber</span></span>
-                # get_attribute("innerText") get text from both spans instead of only the 1st.
-                roles[role.get_attribute("innerText")] = [
-                    track.get_attribute("innerText") for track in rawTracks
-                ]
+                try:
+                    tracksText: String = role.find_element(
+                        By.CLASS_NAME, "role_tracks"
+                    ).get_attribute("innerText")
+                except NoSuchElementException:
+                    pass
+                # Bare get_attribute on spans sometimes also gets text from childs
+                try:
+                    roleText: str = role.get_attribute("innerText").replace(tracksText, "")
+                    roles[roleText] = tracksText
+                except UnboundLocalError:
+                    pass
 
             # track_minor_show_ class elements are not artist names.
             # they are part of small menu thing
@@ -288,7 +291,7 @@ class RYMdata:
         return issueCredits
 
 
-# rym = RYMdata()
+rym = RYMdata()
 # print(rym.getIssueCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
 # print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-knife/silent-shout"))
-# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
+print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
