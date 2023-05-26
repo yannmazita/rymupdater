@@ -12,9 +12,16 @@ from selenium.common.exceptions import NoSuchElementException
 
 
 class RYMdata:
-    """RYM data access"""
+    """RYM data access.
+
+    A RYMdata instance is used as a data access object (DAO) to be used elsewhere.
+    Any service requiring access to rateyourmusic.com should be implemented in this class.
+    A release is merely an artist name and single/EP/album etc name. Each release has at lease one
+    issue. Issues of the same release can have different tracks, label IDs etc.
+    """
 
     def __init__(self):
+        """Initiliazes the instance."""
         self.__driver: webdriver.Chrome = webdriver.Chrome(
             service=ChromiumService(
                 ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
@@ -26,13 +33,13 @@ class RYMdata:
             self.__driver.get(url)
 
     def getReleaseURL(self, artist: str, release: str) -> str:
-        """
-        Get release URL from first match in RYM search.
+        """Gets release URL from first match in RYM search.
+
         Args:
-            artist: The artist to search for.
-            release: The release to search for.
+            artist: The name of the artist to search for.
+            release: The name of the release to search for.
         Returns:
-            str: The URL.
+            The URL of the release.
         """
         urlStart: str = "https://rateyourmusic.com/search?searchterm="
         # urlEnd: str = "&searchtype=l"
@@ -45,45 +52,36 @@ class RYMdata:
 
         return url
 
-    def getTagsFromAlbumInfo(self, releaseUrl: str) -> dict[RYMtags, str]:
-        """
-        Get release tags from first match in RYM search.
-        Args:
-            releaseUrl: The URL of the release to search for.
-        Returns:
-            dict[RYMtags, str]: RYM tags and their value.
-        """
-        dic: dict[RYMtags, str] = {}
-        self.__getPage(releaseUrl)
-
-        albumInfoRows: list[WebElement] = self.__driver.find_elements(
-            By.XPATH, "//table[@class='album_info']/tbody/tr"
-        )
-
-        for row in albumInfoRows:
-            head: WebElement = row.find_element(
-                By.CLASS_NAME, "info_hdr"
-            )  # head for current row
-            data: WebElement = row.find_element(
-                By.TAG_NAME, "td"
-            )  # data for current row
-            try:
-                # dic[RYMtags(head.text)] = ",".join([i.text for i in data])
-                dic[RYMtags(head.text)] = data.text.replace("\n", ", ")
-            except ValueError:
-                # Tag is not defined in RYMtags enum.
-                pass
-
-        return dic
-
     def getIssueURLs(self, releaseUrl: str) -> list[str]:
-        """
-        Get URLs for every issue of given release.
+        """Gets URLs for every issue of given release.
+
+        Each issue of a given release has a URL ending either with its own number or
+        '.p' indicating it is the primary issue. The primary issue url is not the main
+        url (without any suffix).
+
         Args:
             releaseUrl: The URL of the release to search for.
         Returns:
-            list[str]: List of URLs.
+            A list of URLs. For example for the release 'The Knife - Silent Shout':
+
+                [
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout.p/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-3/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-6/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-7/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-2/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-1/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-5/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-8/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-9/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-4/",
+                    "https://rateyourmusic.com/release/album/the-knife/silent-shout-12/",
+                ]
+
+            Note that issues 10 and 11 are missing, they both redirect to the main URL:
+                "https://rateyourmusic.com/release/album/the-knife/silent-shout"
         """
+
         self.__getPage(releaseUrl)
         urls: list[str] = []
         issues: list[WebElement] = self.__driver.find_elements(
@@ -122,14 +120,69 @@ class RYMdata:
 
         return urls
 
-    def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
-        """
-        Get tracklist from issue URL.
+    def getIssueTags(self, issueUrl: str) -> dict[RYMtags, str]:
+        """Gets tags from issue URL.
+
         Args:
             issueUrl: The URL of the issue.
         Returns:
-            dict[str, str]: Dictionnary of tracklist numbers and tracklist titles.
+            A dictionnary {key: value} where key is a RYMtags member and value its
+            corresponding value. For example the primary issue of The Knife - Silent Shout":
+
+                {<RYMtags.ARTIST: 'Artist'>: 'The Knife',
+                 <RYMtags.DATE: 'Released'>: '20 March 2006',
+                 <RYMtags.RECORDING_TIME: 'Recorded'>: 'March 2004 - November 2005',
+                 ...,
+                 <RYMtags.LANGUAGE: 'Language'>: 'English'}
         """
+
+        dic: dict[RYMtags, str] = {}
+        self.__getPage(issueUrl)
+
+        albumInfoRows: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//table[@class='album_info']/tbody/tr"
+        )
+
+        for row in albumInfoRows:
+            head: WebElement = row.find_element(
+                By.CLASS_NAME, "info_hdr"
+            )  # head for current row
+            data: WebElement = row.find_element(
+                By.TAG_NAME, "td"
+            )  # data for current row
+            try:
+                dic[RYMtags(head.text)] = data.text.replace("\n", ", ")
+            except ValueError:
+                # Tag is not defined in RYMtags enum.
+                pass
+
+        return dic
+
+    def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
+        """Gets tracklist from issue URL.
+
+        Args:
+            issueUrl: The URL of the issue.
+        Returns:
+            A dictionnary {key: value} where key is a tracklist number and value a track name.
+            For example the BRILCD103DLX issue of "The Knife - Silent Shout":
+
+                {
+                    "Disc: 1": "Disk I - Silent Shout",
+                    "1.1": "Silent Shout",
+                    "1.2": "Neverland",
+                    ...,
+                    "Disc: 2": "Disk II - Silent Shout an Audiovisual Experience (Live Audio)",
+                    "2.1": "Pass This On",
+                    "2.2": "The Captain",
+                    ...,
+                    "Disc: 3": "Disk III - Silent Shout an Audiovisual Experience (DVD) Live Recording in 5.1",
+                    "3.1": "Pass This On",
+                    ...,
+                    "3.22": "When I Found the Knife (Short Film)",
+                }
+        """
+
         tracklist: dict[str, str] = {}
         self.__getPage(issueUrl)
         tracks: list[WebElement] = self.__driver.find_elements(
@@ -147,38 +200,69 @@ class RYMdata:
                 "./span[@class='tracklist_title']/span[@itemprop='name']/span[@class='rendered_text']",
             )
 
-            if tracklistNum.get_attribute("innerText") == "":
-                # Disc titles do not have tracklist numbers.
-                tracklist[f"Disc: {discNumber + 1}"] = tracklistTitle.get_attribute(
-                    "innerText"
-                )
+            # Track titles always have tracklist numbers and disc titles are always bold.
+            # For example, if on the same disc, track 1-10 are regular audio files and track 11-22
+            # are music videos then the ul where div[@itemprop='track'] elements are found will
+            # feature a "track" (ie: li[@class='track']/div[@itemprop='track'])
+            # between tracks 1-10 and 11-22 without a track number and with
+            # italic inner text (not bold).
+            # Such "tracks" are ignored.
+            trackNumInnerText: str = tracklistNum.get_attribute("innerText").strip()
+            trackTitleInnerText: str = tracklistTitle.get_attribute("innerText")
+            element: WebElement | None = None
+            if not trackNumInnerText:
+                try:
+                    element = tracklistTitle.find_element(By.TAG_NAME, "b")
+                except NoSuchElementException:
+                    pass
+                if element is not None:
+                    discNumber += 1
+                    tracklist[f"Disc: {discNumber}"] = trackTitleInnerText
             else:
-                tracklist[
-                    tracklistNum.get_attribute("innerText")
-                ] = tracklistTitle.get_attribute("innerText")
+                # rateyourmusic track numbers may not have the format
+                # '{disc number}.{track number}'
+                if discNumber != 0 and trackNumInnerText.isdigit():
+                    tracklist[f"{discNumber}.{trackNumInnerText}"] = trackTitleInnerText
+                else:
+                    tracklist[trackNumInnerText] = trackTitleInnerText
+
         return tracklist
 
+    # minor_credits_ forgotten
     def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
-        """
-        Get credits from issue URL.
+        """Get credits from issue URL.
+
         Args:
             issueUrl: The URL of the issue.
         Returns:
-            dict[str, dict[str, list[str]]]: Issue credits
+            A nested dictionnary {artist, {role, tracks}} where artist is an artist name,
+            role is the credited role and tracks is a list of tracks where the artist is credited.
+            When tracks is empty, it assumed that the artist has the given role on every track.
+            For example the main URL (not primary) of "The Knife - Silent Shout":
+
         """
+
         issueCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
-        creds: list[WebElement] = self.__driver.find_elements(
+        mainCreds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
         )
+        minorCreds: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//div[@id='minor_credits_']/li"
+        )
+        creds: list[WebElement] = mainCreds + minorCreds
 
         for credit in creds:
+            # Credited artist has a link to their RYM page
             try:
-                # Credited artist has a link to their RYM page
                 artist: WebElement = credit.find_element(By.CLASS_NAME, "artist")
+            # Credited artist doesn't have a link to their RYM page
             except NoSuchElementException:
-                # Credited artist doesn't have a link to their RYM page
-                artist: WebElement = credit.find_element(By.TAG_NAME, "span")
+                try:
+                    artist: WebElement = credit.find_element(By.TAG_NAME, "span")
+                # Fails on empty li item
+                except NoSuchElementException:
+                    pass
 
             rawRoles: list[WebElement] = credit.find_elements(
                 By.CLASS_NAME, "role_name"
@@ -188,12 +272,23 @@ class RYMdata:
                 rawTracks: list[WebElement] = role.find_elements(
                     By.CLASS_NAME, "role_tracks"
                 )
+                # Some times, track numbers get appended to the role name in minor credits.
+                # the HTML is as follows
+                # <span class=role_name>role<span class=role_tracks>tracknumber</span></span>
+                # get_attribute("innerText") get text from both spans instead of only the 1st.
                 roles[role.get_attribute("innerText")] = [
                     track.get_attribute("innerText") for track in rawTracks
                 ]
 
             # track_minor_show_ class elements are not artist names.
+            # they are part of small menu thing
             if artist.get_attribute("id") != "track_minor_show_":
                 issueCredits[artist.get_attribute("innerText")] = roles
 
         return issueCredits
+
+
+# rym = RYMdata()
+# print(rym.getIssueCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
+# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-knife/silent-shout"))
+# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))

@@ -43,3 +43,4 @@ class RYMtags(Enum):
     LANGUAGE = "Language"
     RECORDING_TIME = "Recorded"
     RELEASE_TIME = "Released"
+    LABEL_AND_LABEL_ID = "Issue details"    # Format: "LABEL / LABEL_ID /"
