@@ -228,7 +228,7 @@ class RYMdata:
 
         return tracklist
 
-    # Mellon Collie works but both primary issue url and main url don't work with Silent Shout (empty tracks)
+    # minor_credits_ forgotten
     def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, list[str]]]:
         """Get credits from issue URL.
 
@@ -244,17 +244,25 @@ class RYMdata:
 
         issueCredits: dict[str, dict[str, list[str]]] = {}
         self.__getPage(issueUrl)
-        creds: list[WebElement] = self.__driver.find_elements(
+        mainCreds: list[WebElement] = self.__driver.find_elements(
             By.XPATH, "//ul[@id='credits_']/li"
         )
+        minorCreds: list[WebElement] = self.__driver.find_elements(
+            By.XPATH, "//div[@id='minor_credits_']/li"
+        )
+        creds: list[WebElement] = mainCreds + minorCreds
 
         for credit in creds:
+            # Credited artist has a link to their RYM page
             try:
-                # Credited artist has a link to their RYM page
                 artist: WebElement = credit.find_element(By.CLASS_NAME, "artist")
+            # Credited artist doesn't have a link to their RYM page
             except NoSuchElementException:
-                # Credited artist doesn't have a link to their RYM page
-                artist: WebElement = credit.find_element(By.TAG_NAME, "span")
+                try:
+                    artist: WebElement = credit.find_element(By.TAG_NAME, "span")
+                # Fails on empty li item
+                except NoSuchElementException:
+                    pass
 
             rawRoles: list[WebElement] = credit.find_elements(
                 By.CLASS_NAME, "role_name"
@@ -264,18 +272,23 @@ class RYMdata:
                 rawTracks: list[WebElement] = role.find_elements(
                     By.CLASS_NAME, "role_tracks"
                 )
+                # Some times, track numbers get appended to the role name in minor credits.
+                # the HTML is as follows
+                # <span class=role_name>role<span class=role_tracks>tracknumber</span></span>
+                # get_attribute("innerText") get text from both spans instead of only the 1st.
                 roles[role.get_attribute("innerText")] = [
                     track.get_attribute("innerText") for track in rawTracks
                 ]
 
             # track_minor_show_ class elements are not artist names.
+            # they are part of small menu thing
             if artist.get_attribute("id") != "track_minor_show_":
                 issueCredits[artist.get_attribute("innerText")] = roles
 
         return issueCredits
 
 
-rym = RYMdata()
-print(rym.getIssueCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
+# rym = RYMdata()
+# print(rym.getIssueCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
 # print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-knife/silent-shout"))
 # print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
