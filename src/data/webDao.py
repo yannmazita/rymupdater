@@ -239,8 +239,25 @@ class RYMdata:
             role is the credited role and tracks is a string of tracks
             where the artist is credited.
             When tracks is empty, it assumed that the artist has the given role on every track.
-            For example the main URL (not primary) of "The Knife - Silent Shout":
+            For example the primary issue of "The Knife - Silent Shout":
 
+                {
+                    "The Knife": {
+                        "music": "",
+                        "lyrics": "",
+                        "recording engineer": "",
+                        "programming": "",
+                        "performer": "",
+                        "producer": "",
+                        "vocals": "",
+                        "mixing": "",
+                    },
+                    "Henrik Jonsson": {"mastering engineer": ""},
+                    "Johan Toorell": {},
+                    "Jay-Jay Johanson": {"vocals": "6", "lyrics": "6"},
+                    "Christoffer Berg": {"mixing": "1-7, 9, 11"},
+                    "Pelle Gunnerfeldt": {"mixing": "8, 10"},
+                }
         """
 
         issueCredits: dict[str, dict[str, str]] = {}
@@ -270,16 +287,26 @@ class RYMdata:
             )
             roles: dict[str, str] = {}
             for role in rawRoles:
+                tracksText: str = ""
                 try:
-                    tracksText: String = role.find_element(
+                    tracksText = role.find_element(
                         By.CLASS_NAME, "role_tracks"
                     ).get_attribute("innerText")
                 except NoSuchElementException:
                     pass
+                try:
+                    roleText: str = role.get_attribute("innerText")
+                except UnboundLocalError:
+                    roleText: str = role.find_element(
+                        By.XPATH, "./span[@class='rendered_text']"
+                    ).get_attribute("innerText")
                 # Bare get_attribute on spans sometimes also gets text from childs
                 try:
-                    roleText: str = role.get_attribute("innerText").replace(tracksText, "")
-                    roles[roleText] = tracksText
+                    newRoleText: str = roleText.replace(tracksText, "")
+                    if newRoleText == "":
+                        roles[roleText] = tracksText
+                    else:
+                        roles[newRoleText] = tracksText
                 except UnboundLocalError:
                     pass
 
@@ -292,6 +319,27 @@ class RYMdata:
 
 
 rym = RYMdata()
-# print(rym.getIssueCredits(rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]))
+print(
+    rym.getIssueCredits(
+        rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]
+    )
+)
 # print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-knife/silent-shout"))
-print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
+# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
+dic = {
+    "The Knife": {
+        "music": "",
+        "lyrics": "",
+        "recording engineer": "",
+        "programming": "",
+        "performer": "",
+        "producer": "",
+        "vocals": "",
+        "mixing": "",
+    },
+    "Henrik Jonsson": {"mastering engineer": ""},
+    "Johan Toorell": {},
+    "Jay-Jay Johanson": {"vocals": "6", "lyrics": "6"},
+    "Christoffer Berg": {"mixing": "1-7, 9, 11"},
+    "Pelle Gunnerfeldt": {"mixing": "8, 10"},
+}
