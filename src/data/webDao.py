@@ -316,30 +316,3 @@ class RYMdata:
                 issueCredits[artist.get_attribute("innerText")] = roles
 
         return issueCredits
-
-
-rym = RYMdata()
-print(
-    rym.getIssueCredits(
-        rym.getIssueURLs(rym.getReleaseURL("The Knife", "Silent Shout"))[0]
-    )
-)
-# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-knife/silent-shout"))
-# print(rym.getIssueCredits("https://rateyourmusic.com/release/album/the-smashing-pumpkins/mellon-collie-and-the-infinite-sadness/"))
-dic = {
-    "The Knife": {
-        "music": "",
-        "lyrics": "",
-        "recording engineer": "",
-        "programming": "",
-        "performer": "",
-        "producer": "",
-        "vocals": "",
-        "mixing": "",
-    },
-    "Henrik Jonsson": {"mastering engineer": ""},
-    "Johan Toorell": {},
-    "Jay-Jay Johanson": {"vocals": "6", "lyrics": "6"},
-    "Christoffer Berg": {"mixing": "1-7, 9, 11"},
-    "Pelle Gunnerfeldt": {"mixing": "8, 10"},
-}
