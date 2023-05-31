@@ -1,36 +1,175 @@
+from collections.abc import Iterator
 from pathlib import Path
 from mutagen.id3 import ID3
+from mutagen.id3._frames import (
+    TIT2,
+    TIT3,
+    TPE1,
+    TOPE,
+    TPE2,
+    TPE3,
+    TPE4,
+    TIPL,
+    TXXX,
+    TSO2,
+    TRCK,
+    TPOS,
+    TALB,
+    TSOA,
+    TSST,
+    TDRC,
+    TDRL,
+    TCON,
+    TLAN,
+    TCOM,
+    TSOC,
+    TPUB,
+    TMCL,
+    TEXT,
+    TBPM,
+    TMED,
+    TCMP,
+    COMM,
+)
 
 from src.application.domain import ID3Keys
 
 
 class FileData:
-    """Music file data access"""
+    """Music file data access.
 
-    @staticmethod
-    def getTagsFromFile(path: Path) -> dict[ID3Keys, str]:
-        """
-        Get ID3 tags from file.
+    A FileData instance is used as a data access object (DAO) to be used elsewhere.
+    Any service requiring access to audio files should be implemented in this class.
+    """
+
+    def __init__(self, musicDirectory: Path):
+        """Initiliazes the instance based on the path of the music directory.
+
         Args:
-            path: File path.
-        Returns:
-            dict[ID3Keys, str]: dictitonnary of tags and their corresponding value.
+            musicDirectory: The path of the music directory.
         """
-        audio: ID3 = ID3(path)
-        tags: dict[ID3Keys, str] = {}
+        # self.__paths: Iterator[Path] = iter([])
+        self.__paths: Iterator[Path] = Path(musicDirectory).rglob("*.mp3")
+        self.__currentMP3File: ID3 = ID3()
+
+    def loadNextFile(self) -> bool:
+        """Loads next audio file from paths in FileData instance.
+
+        Returns:
+            A boolean, true if file was loaded, false otherwise.
+        """
+        try:
+            path: str = str(next(self.__paths))
+        except StopIteration:
+            return False
+
+        self.__currentMP3File = ID3(path)
+
+        return True
+
+    def getTagsFromFile(self) -> dict[ID3Keys, list[str]]:
+        """Gets ID3 tags from loaded file.
+
+        Returns:
+            A dictionnary {key: value} where key is an ID3Keys member and value
+            a list of ID3 frames with the given name.
+        """
+        tags: dict[ID3Keys, list[str]] = {}
+
+        for frame in ID3Keys:
+            tags[frame] = self.__currentMP3File.getall(frame.value)
 
         return tags
 
-    @staticmethod
-    def updateFileTags(path: Path, dic: dict[ID3Keys, str]) -> None:
-        """
-        Update ID3 tags in file.
+    def updateFileTag(self, frame: ID3Keys, value: str) -> None:
+        """Update ID3 frame in loaded file.
+
         Args:
-            path: File path.
-            dic: Dictionnary of AudioTags keys and the corresponding value to update.
+            frame: ID3 frame to update.
+            value: Corresponding value.
         Returns:
             None
         """
-        audio: ID3 = ID3(path)
-        for tag in dic:
-            audio[tag.value] = dic[tag]
+
+        match frame:
+            case ID3Keys.TITLE:
+                self.__currentMP3File.add(TIT2(encoding=3, text=["" + value + ""]))
+            case ID3Keys.TRACK_SUBTITLE:
+                self.__currentMP3File.add(TIT3(encoding=3, text=["" + value + ""]))
+            case ID3Keys.ARTIST:
+                self.__currentMP3File.add(TPE1(encoding=3, text=["" + value + ""]))
+            case ID3Keys.PERFORMER:
+                self.__currentMP3File.add(TOPE(encoding=3, text=["" + value + ""]))
+            case ID3Keys.BAND:
+                self.__currentMP3File.add(TPE2(encoding=3, text=["" + value + ""]))
+            case ID3Keys.CONDUCTOR:
+                self.__currentMP3File.add(TPE3(encoding=3, text=["" + value + ""]))
+            case ID3Keys.INTERPRETER_REMIXER:
+                self.__currentMP3File.add(TPE4(encoding=3, text=["" + value + ""]))
+            case ID3Keys.INVOLVED_PEOPLE:
+                self.__currentMP3File.add(TIPL(encoding=3, text=["" + value + ""]))
+            case ID3Keys.ALBUM_ARTIST:
+                self.__currentMP3File.add(
+                    TXXX(
+                        encoding=3,
+                        desc="QuodLibet::albumartist",
+                        text=["" + value + ""],
+                    )
+                )
+            case ID3Keys.ALBUM_SORT_ORDER:
+                self.__currentMP3File.add(TSO2(encoding=3, text=["" + value + ""]))
+            case ID3Keys.TRACK_NUM:
+                self.__currentMP3File.add(TRCK(encoding=3, text=["" + value + ""]))
+            case ID3Keys.DISC_NUM:
+                self.__currentMP3File.add(TPOS(encoding=3, text=["" + value + ""]))
+            case ID3Keys.ALBUM:
+                self.__currentMP3File.add(TALB(encoding=3, text=["" + value + ""]))
+            case ID3Keys.ALBUM_SORT_ORDER:
+                self.__currentMP3File.add(TSOA(encoding=3, text=["" + value + ""]))
+            case ID3Keys.DISC_SUBTITLE:
+                self.__currentMP3File.add(TSST(encoding=3, text=["" + value + ""]))
+            case ID3Keys.RECORDING_TIME:
+                self.__currentMP3File.add(TDRC(encoding=3, text=["" + value + ""]))
+            case ID3Keys.RELEASE_TIME:
+                self.__currentMP3File.add(TDRL(encoding=3, text=["" + value + ""]))
+            case ID3Keys.GENRE:
+                self.__currentMP3File.add(TCON(encoding=3, text=["" + value + ""]))
+            case ID3Keys.DESCRIPTION:
+                self.__currentMP3File.add(
+                    TXXX(
+                        encoding=3,
+                        desc="QuodLibet::description",
+                        text=["" + value + ""],
+                    )
+                )
+            case ID3Keys.LANGUAGE:
+                self.__currentMP3File.add(TLAN(encoding=3, text=["" + value + ""]))
+            case ID3Keys.COMPOSER:
+                self.__currentMP3File.add(TCOM(encoding=3, text=["" + value + ""]))
+            case ID3Keys.COMPOSER_SORT_ORDER:
+                self.__currentMP3File.add(TSOC(encoding=3, text=["" + value + ""]))
+            case ID3Keys.LABEL:
+                self.__currentMP3File.add(TPUB(encoding=3, text=["" + value + ""]))
+            case ID3Keys.LABEL_ID:
+                self.__currentMP3File.add(
+                    TXXX(encoding=3, desc="QuodLibet::labelid", text=["" + value + ""])
+                )
+            case ID3Keys.MUSICIAN_CREDITS:
+                self.__currentMP3File.add(TMCL(encoding=3, text=["" + value + ""]))
+            case ID3Keys.WRITTEN_BY:
+                self.__currentMP3File.add(TEXT(encoding=3, text=["" + value + ""]))
+            case ID3Keys.BPM:
+                self.__currentMP3File.add(TBPM(encoding=3, text=["" + value + ""]))
+            case ID3Keys.MEDIA:
+                self.__currentMP3File.add(TMED(encoding=3, text=["" + value + ""]))
+            case ID3Keys.COMPILATION:
+                self.__currentMP3File.add(TCMP(encoding=3, text=["" + value + ""]))
+            case ID3Keys.COMMENT:
+                self.__currentMP3File.add(
+                    TCMP(encoding=3, lang="eng", desc="desc", text=["" + value + ""])
+                )
+
+        self.__currentMP3File.save()
+
+
+# data = FileData(Path("/home/yann/music"))
