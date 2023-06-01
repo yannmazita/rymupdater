@@ -159,7 +159,7 @@ class RYMdata:
         return dic
 
     def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
-        """Gets tracklist from issue URL.
+        """Gets a tracklist from an issue URL.
 
         Args:
             issueUrl: The URL of the issue.
@@ -230,7 +230,7 @@ class RYMdata:
 
     # minor_credits_ forgotten
     def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, str]]:
-        """Get credits from issue URL.
+        """Gets credits from an issue URL.
 
         Args:
             issueUrl: The URL of the issue.
@@ -300,7 +300,7 @@ class RYMdata:
                     roleText: str = role.find_element(
                         By.XPATH, "./span[@class='rendered_text']"
                     ).get_attribute("innerText")
-                # Bare get_attribute on spans sometimes also gets text from childs
+                # Bare get_attribute on spans sometimes also gets text from children
                 try:
                     newRoleText: str = roleText.replace(tracksText, "")
                     if newRoleText == "":
@@ -311,7 +311,7 @@ class RYMdata:
                     pass
 
             # track_minor_show_ class elements are not artist names.
-            # they are part of small menu thing
+            # they are part of a small menu thing
             if artist.get_attribute("id") != "track_minor_show_":
                 issueCredits[artist.get_attribute("innerText")] = roles
 
