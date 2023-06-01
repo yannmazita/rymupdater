@@ -1,6 +1,7 @@
 # rymupdater
 
-**rymupdater** is a audio tag updater using information found at rateyourmusic.com .
+**rymupdater** is an id3 tag updater using information found at rateyourmusic.com .
+Work in progress.
 
 ## Dependencies
 
@@ -21,4 +22,6 @@ poetry install
 ### Using requirements.txt
 
 Dependencies defined in requirements.txt can be installed in a virtual environment.
-
+```commandline
+python -m pip install -r requirements.txt
+```
