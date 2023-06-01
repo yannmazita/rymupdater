@@ -84,6 +84,8 @@ class FileData:
     def updateFileTag(self, frame: ID3Keys, value: str) -> None:
         """Update ID3 frame in loaded file.
 
+        This will replace the old frame value if the frame exists already.
+
         Args:
             frame: ID3 frame to update.
             value: Corresponding value.
@@ -166,7 +168,7 @@ class FileData:
                 self.__currentMP3File.add(TCMP(encoding=3, text=["" + value + ""]))
             case ID3Keys.COMMENT:
                 self.__currentMP3File.add(
-                    TCMP(encoding=3, lang="eng", desc="desc", text=["" + value + ""])
+                    COMM(encoding=3, lang="eng", desc="desc", text=["" + value + ""])
                 )
 
         self.__currentMP3File.save()
