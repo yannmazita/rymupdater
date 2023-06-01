@@ -28,7 +28,7 @@ class ID3Keys(Enum):
     LABEL_ID = "TXXX:QuodLibet::labelid"
     MUSICIAN_CREDITS = "TMCL"
     WRITTEN_BY = "TEXT"
-    ISRC = "ISRC"
+    # ISRC = "ISRC"
     BPM = "TBPM"
     MEDIA = "TMED"
     COMPILATION = "TCMP"  # '0' or '1'
