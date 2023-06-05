@@ -228,7 +228,6 @@ class RYMdata:
 
         return tracklist
 
-    # minor_credits_ forgotten
     def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, str]]:
         """Gets credits from an issue URL.
 
