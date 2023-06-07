@@ -6,12 +6,10 @@ from pathlib import Path
 
 
 class RYMupdater:
-    """ RYM main services
-    """
+    """RYM main services"""
 
     def __init__(self):
-        """Initialiazes the instance.
-        """
+        """Initialiazes the instance."""
         self.__fileData: FileData | None = None
         self.__rymData: RYMdata | None = None
 
@@ -122,3 +120,16 @@ class RYMupdater:
         """
         assert self.__rymData is not None
         return self.__rymData.getIssueCredits(issueUrl)
+
+    def tagLibrary(self, musicDirectory: Path) -> None:
+        self.initializeData(musicDirectory)
+        while self.loadNextFile() is not False:
+            initialTags: dict[domain.ID3Keys, list[str]] = self.getTagsFromFile()
+            artist: str = initialTags[domain.ID3Keys.ARTIST][0]
+            release: str = initialTags[domain.ID3Keys.ALBUM][0]
+            releaseUrl: str = self.getReleaseURL(artist, release)
+            issueUrl: str = self.getIssueURLs(releaseUrl)[0]
+            retrievedTags: dict[domain.RYMtags, str] = self.getIssueTags(issueUrl)
+
+            for tag in retrievedTags:
+                self.updateFileTag(domain.ID3Keys(tag.name), retrievedTags[tag])

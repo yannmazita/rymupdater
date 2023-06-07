@@ -49,6 +49,7 @@ class FileData:
             musicDirectory: The path of the music directory.
         """
         # self.__paths: Iterator[Path] = iter([])
+        self.__currentPath: Path = Path("")
         self.__paths: Iterator[Path] = Path(musicDirectory).rglob("*.mp3")
         self.__currentMP3File: ID3 = ID3()
 
@@ -59,11 +60,11 @@ class FileData:
             A boolean, true if file was loaded, false otherwise.
         """
         try:
-            path: str = str(next(self.__paths))
+            self.__currentPath = Path(next(self.__paths))
         except StopIteration:
             return False
 
-        self.__currentMP3File = ID3(path)
+        self.__currentMP3File = ID3(self.__currentPath)
 
         return True
 
@@ -172,6 +173,3 @@ class FileData:
                 )
 
         self.__currentMP3File.save()
-
-
-# data = FileData(Path("/home/yann/music"))
