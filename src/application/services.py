@@ -13,7 +13,7 @@ class RYMupdater:
         self.__fileData: FileData | None = None
         self.__rymData: RYMdata | None = None
 
-    def initializeData(self, musicDirectory: Path) -> None:
+    def __initializeData(self, musicDirectory: Path) -> None:
         """Initialiazes data access objects.
 
         Args:
@@ -24,7 +24,7 @@ class RYMupdater:
         self.__fileData = FileData(musicDirectory)
         self.__rymData = RYMdata()
 
-    def loadNextFile(self) -> bool:
+    def __loadNextFile(self) -> bool:
         """Loads next audio file.
 
         Returns:
@@ -33,7 +33,7 @@ class RYMupdater:
         assert self.__fileData is not None
         return self.__fileData.loadNextFile()
 
-    def getTagsFromFile(self) -> dict[domain.ID3Keys, list[str]]:
+    def __getTagsFromFile(self) -> dict[domain.ID3Keys, list[str]]:
         """Gets ID3 tags from loaded file.
 
         Returns:
@@ -43,7 +43,7 @@ class RYMupdater:
         assert self.__fileData is not None
         return self.__fileData.getTagsFromFile()
 
-    def updateFileTag(self, frame: domain.ID3Keys, value: str) -> None:
+    def __updateFileTag(self, frame: domain.ID3Keys, value: str) -> None:
         """Update ID3 frame in loaded file.
 
         This will replace the old frame value if the frame exists already.
@@ -57,7 +57,7 @@ class RYMupdater:
         assert self.__fileData is not None
         self.__fileData.updateFileTag(frame, value)
 
-    def getReleaseURL(self, artist: str, release: str) -> str:
+    def __getReleaseURL(self, artist: str, release: str) -> str:
         """Gets release URL from first match in RYM search.
 
         Args:
@@ -69,7 +69,7 @@ class RYMupdater:
         assert self.__rymData is not None
         return self.__rymData.getReleaseURL(artist, release)
 
-    def getIssueURLs(self, releaseUrl: str) -> list[str]:
+    def __getIssueURLs(self, releaseUrl: str) -> list[str]:
         """Gets URLs for every issue of given release.
 
         Each issue of a given release has a URL ending either with its own number or
@@ -84,7 +84,7 @@ class RYMupdater:
         assert self.__rymData is not None
         return self.__rymData.getIssueURLs(releaseUrl)
 
-    def getIssueTags(self, issueUrl: str) -> dict[domain.RYMtags, str]:
+    def __getIssueTags(self, issueUrl: str) -> dict[domain.RYMtags, str]:
         """Gets tags from issue URL.
 
         Args:
@@ -96,7 +96,7 @@ class RYMupdater:
         assert self.__rymData is not None
         return self.__rymData.getIssueTags(issueUrl)
 
-    def getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
+    def __getIssueTracklist(self, issueUrl: str) -> dict[str, str]:
         """Gets a tracklist from an issue URL.
 
         Args:
@@ -107,7 +107,7 @@ class RYMupdater:
         assert self.__rymData is not None
         return self.__rymData.getIssueTracklist(issueUrl)
 
-    def getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, str]]:
+    def __getIssueCredits(self, issueUrl: str) -> dict[str, dict[str, str]]:
         """Gets credits from an issue URL.
 
         Args:
@@ -121,15 +121,46 @@ class RYMupdater:
         assert self.__rymData is not None
         return self.__rymData.getIssueCredits(issueUrl)
 
+    def __separateIssueDetails(
+        self, retrievedTags: dict[domain.RYMtags, str]
+    ) -> dict[domain.RYMtags, str]:
+        """Separates label name from label id.
+
+        Both label and label id get retrieved in the same RYMtags element from the Internet.
+        This method ensures the dictionnary making up the retrieved tags has both of them
+        with their own key.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from rateyourmusic.com.
+        Returns:
+            The modified dictionnary.
+        """
+        updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
+        labelAndLabelID: str = updatedDictionnary[domain.RYMtags.LABEL_AND_LABEL_ID]
+        labelSplit: list[str] = labelAndLabelID.split(" / ")
+        updatedDictionnary.pop(domain.RYMtags.LABEL_AND_LABEL_ID)
+        updatedDictionnary[domain.RYMtags.LABEL] = labelSplit[0]
+        updatedDictionnary[domain.RYMtags.LABEL_ID] = labelSplit[1]
+        return updatedDictionnary
+
     def tagLibrary(self, musicDirectory: Path) -> None:
-        self.initializeData(musicDirectory)
-        while self.loadNextFile() is not False:
-            initialTags: dict[domain.ID3Keys, list[str]] = self.getTagsFromFile()
+        """Tags every .mp3 file in the music library.
+
+        Args:
+            musicDirectory: The path of the music directory.
+        Returns:
+            None
+        """
+        self.__initializeData(musicDirectory)
+        while self.__loadNextFile() is not False:
+            initialTags: dict[domain.ID3Keys, list[str]] = self.__getTagsFromFile()
             artist: str = initialTags[domain.ID3Keys.ARTIST][0]
             release: str = initialTags[domain.ID3Keys.ALBUM][0]
-            releaseUrl: str = self.getReleaseURL(artist, release)
-            issueUrl: str = self.getIssueURLs(releaseUrl)[0]
-            retrievedTags: dict[domain.RYMtags, str] = self.getIssueTags(issueUrl)
+            releaseUrl: str = self.__getReleaseURL(artist, release)
+            issueUrl: str = self.__getIssueURLs(releaseUrl)[0]
+            tags: dict[domain.RYMtags, str] = self.__separateIssueDetails(
+                self.__getIssueTags(issueUrl)
+            )
 
-            for tag in retrievedTags:
-                self.updateFileTag(domain.ID3Keys(tag.name), retrievedTags[tag])
+            for rymTag in tags:
+                self.__updateFileTag(domain.ID3Keys(rymTag.name), tags[rymTag])

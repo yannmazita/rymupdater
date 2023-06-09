@@ -44,3 +44,5 @@ class RYMtags(Enum):
     RECORDING_TIME = "Recorded"
     RELEASE_TIME = "Released"
     LABEL_AND_LABEL_ID = "Issue details"    # Format: "LABEL / LABEL_ID /"
+    LABEL = "not-used"  # Is not found individually on the webpage
+    LABEL_ID = "not-used"  # Is not found individually on the webpage
