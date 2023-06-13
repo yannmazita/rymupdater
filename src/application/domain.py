@@ -5,8 +5,9 @@ class ID3Keys(Enum):
     TITLE = "TIT2"
     TRACK_SUBTITLE = "TIT3"
     ARTIST = "TPE1"
-    PERFORMER = "TOPE"  # Album artist
-    BAND = "TPE2"  # classical music
+    ARTIST_SORT = "TSOP"    # Should "performer sort" but shows up as "artistsort in Quod Libet
+    PERFORMER = "TPE2"  # Should be "band" but shows up as performer in Quod Libet
+    PERFORMER_SORT = "TXXX:QuodLibet::performersort"
     CONDUCTOR = "TPE3"  # classical music
     INTERPRETER_REMIXER = "TPE4"  # Intrepreter or remixer or modifier.
     INVOLVED_PEOPLE = "TIPL"  # Engineers, producers, mixers...
@@ -33,6 +34,8 @@ class ID3Keys(Enum):
     MEDIA = "TMED"
     COMPILATION = "TCMP"  # '0' or '1'
     COMMENT = "COMM"
+    STATS = "POPM"
+    TEST = ""
 
 
 class RYMtags(Enum):

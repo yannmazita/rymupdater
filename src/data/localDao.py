@@ -5,7 +5,6 @@ from mutagen.id3._frames import (
     TIT2,
     TIT3,
     TPE1,
-    TOPE,
     TPE2,
     TPE3,
     TPE4,
@@ -30,6 +29,8 @@ from mutagen.id3._frames import (
     TMED,
     TCMP,
     COMM,
+    TSOP,
+    POPM
 )
 
 from src.application.domain import ID3Keys
@@ -96,71 +97,90 @@ class FileData:
 
         match frame:
             case ID3Keys.TITLE:
-                self.__currentMP3File["TIT2"] = TIT2(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TIT2(encoding=3, text=["" + value + ""]))
             case ID3Keys.TRACK_SUBTITLE:
-                self.__currentMP3File["TIT3"] = TIT3(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TIT3(encoding=3, text=["" + value + ""]))
             case ID3Keys.ARTIST:
-                self.__currentMP3File["TPE1"] = TPE1(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TPE1(encoding=3, text=["" + value + ""]))
+            case ID3Keys.ARTIST_SORT:
+                self.__currentMP3File.add(TSOP(encoding=3, text=["" + value + ""]))
             case ID3Keys.PERFORMER:
-                self.__currentMP3File["TOPE"] = TOPE(encoding=3, text=["" + value + ""])
-            case ID3Keys.BAND:
-                self.__currentMP3File["TPE2"] = TPE2(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TPE2(encoding=3, text=["" + value + ""]))
+            case ID3Keys.PERFORMER_SORT:
+                self.__currentMP3File.add(
+                    TXXX(
+                        encoding=3,
+                        desc="QuodLibet::performersort",
+                        text=["" + value + ""],
+                    )
+                )
             case ID3Keys.CONDUCTOR:
-                self.__currentMP3File["TPE3"] = TPE3(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TPE3(encoding=3, text=["" + value + ""]))
             case ID3Keys.INTERPRETER_REMIXER:
-                self.__currentMP3File["TPE4"] = TPE4(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TPE4(encoding=3, text=["" + value + ""]))
             case ID3Keys.INVOLVED_PEOPLE:
-                self.__currentMP3File["TIPL"] = TIPL(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TIPL(encoding=3, text=["" + value + ""]))
             case ID3Keys.ALBUM_ARTIST:
-                self.__currentMP3File.add(TXXX(encoding=3,desc="QuodLibet::albumartist",text=["" + value + ""],))
+                self.__currentMP3File.add(
+                    TXXX(
+                        encoding=3,
+                        desc="QuodLibet::albumartist",
+                        text=["" + value + ""],
+                    )
+                )
             case ID3Keys.ALBUM_SORT_ORDER:
-                self.__currentMP3File["TSO2"] = TSO2(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TSO2(encoding=3, text=["" + value + ""]))
             case ID3Keys.TRACK_NUM:
-                self.__currentMP3File["TRCK"] = TRCK(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TRCK(encoding=3, text=["" + value + ""]))
             case ID3Keys.DISC_NUM:
-                self.__currentMP3File["TPOS"] = TPOS(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TPOS(encoding=3, text=["" + value + ""]))
             case ID3Keys.ALBUM:
-                self.__currentMP3File["TALB"] = TALB(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TALB(encoding=3, text=["" + value + ""]))
             case ID3Keys.ALBUM_SORT_ORDER:
-                self.__currentMP3File["TSOA"] = TSOA(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TSOA(encoding=3, text=["" + value + ""]))
             case ID3Keys.DISC_SUBTITLE:
-                self.__currentMP3File["TSST"] = TSST(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TSST(encoding=3, text=["" + value + ""]))
             case ID3Keys.RECORDING_TIME:
-                self.__currentMP3File["TDRC"] = TDRC(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TDRC(encoding=3, text=["" + value + ""]))
             case ID3Keys.RELEASE_TIME:
-                self.__currentMP3File["TDRL"] = TDRL(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TDRL(encoding=3, text=["" + value + ""]))
             case ID3Keys.GENRE:
-                self.__currentMP3File["TCON"] = TCON(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TCON(encoding=3, text=["" + value + ""]))
             case ID3Keys.DESCRIPTION:
-                self.__currentMP3File.add(TXXX(encoding=3,desc="QuodLibet::description",text=["" + value + ""],))
+                self.__currentMP3File.add(
+                    TXXX(
+                        encoding=3,
+                        desc="QuodLibet::description",
+                        text=["" + value + ""],
+                    )
+                )
             case ID3Keys.LANGUAGE:
-                self.__currentMP3File["TLAN"] = TLAN(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TLAN(encoding=3, text=["" + value + ""]))
             case ID3Keys.COMPOSER:
-                self.__currentMP3File["TCOM"] = TCOM(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TCOM(encoding=3, text=["" + value + ""]))
             case ID3Keys.COMPOSER_SORT_ORDER:
-                self.__currentMP3File["TSOC"] = TSOC(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TSOC(encoding=3, text=["" + value + ""]))
             case ID3Keys.LABEL:
-                self.__currentMP3File["TPUB"] = TPUB(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TPUB(encoding=3, text=["" + value + ""]))
             case ID3Keys.LABEL_ID:
-                self.__currentMP3File.add(TXXX(encoding=3, desc="QuodLibet::labelid", text=["" + value + ""]))
+                self.__currentMP3File.add(
+                    TXXX(encoding=3, desc="QuodLibet::labelid", text=["" + value + ""])
+                )
             case ID3Keys.MUSICIAN_CREDITS:
-                self.__currentMP3File["TMCL"] = TMCL(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TMCL(encoding=3, text=["" + value + ""]))
             case ID3Keys.WRITTEN_BY:
-                self.__currentMP3File["TEXT"] = TEXT(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TEXT(encoding=3, text=["" + value + ""]))
             case ID3Keys.BPM:
-                self.__currentMP3File["TBPM"] = TBPM(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TBPM(encoding=3, text=["" + value + ""]))
             case ID3Keys.MEDIA:
-                self.__currentMP3File["TMED"] = TMED(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TMED(encoding=3, text=["" + value + ""]))
             case ID3Keys.COMPILATION:
-                self.__currentMP3File["TCMP"] = TCMP(encoding=3, text=["" + value + ""])
+                self.__currentMP3File.add(TCMP(encoding=3, text=["" + value + ""]))
             case ID3Keys.COMMENT:
-                self.__currentMP3File.add(COMM(encoding=3, lang="eng", desc="desc", text=["" + value + ""]))
+                self.__currentMP3File.add(
+                    COMM(encoding=3, lang="eng", desc="desc", text=["" + value + ""])
+                )
+            case ID3Keys.TEST:
+                pass
 
         self.__currentMP3File.save()
-
-
-file = FileData(Path("/home/yann/music"))
-# first track is "the knife/silent shout/07 - like a pen.mp3"
-file.loadNextFile()
-file.updateFileTag(ID3Keys.BAND, "perfomer test, BAND")
-print(file.getTagsFromFile())
