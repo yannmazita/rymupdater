@@ -79,7 +79,7 @@ class FileData:
         tags: dict[ID3Keys, list[str]] = {}
 
         for frame in ID3Keys:
-            tags[frame] = self.__currentMP3File.getall(frame.value)
+            tags[frame] = list(map(str, self.__currentMP3File.getall(frame.value)))
 
         return tags
 
