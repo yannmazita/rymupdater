@@ -137,7 +137,7 @@ class RYMupdater:
         """
         updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
         labelAndLabelID: str = updatedDictionnary[domain.RYMtags.LABEL_AND_LABEL_ID]
-        labelSplit: list[str] = labelAndLabelID.split(" / ")
+        labelSplit: list[str] = [i.lstrip() for i in labelAndLabelID.split(" /")]
         updatedDictionnary.pop(domain.RYMtags.LABEL_AND_LABEL_ID)
         updatedDictionnary[domain.RYMtags.LABEL] = labelSplit[0]
         updatedDictionnary[domain.RYMtags.LABEL_ID] = labelSplit[1]
