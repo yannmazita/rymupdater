@@ -1,6 +1,6 @@
 # rymupdater
 
-**rymupdater** is an id3 tag updater using information found at rateyourmusic.com .
+**rymupdater** is an id3 tag updater using information found at rateyourmusic.com.
 Work in progress.
 
 ## Dependencies
@@ -19,7 +19,6 @@ Inside the cloned repository:
 ```commandline
 poetry install
 ```
-
 ### Using requirements.txt
 
 Dependencies defined in requirements.txt can be installed in a virtual environment.
@@ -29,5 +28,7 @@ python -m pip install -r requirements.txt
 
 ## Todo
 - GUI
+- Credit tagging
+- Release and recording time format standardisation
 - Handling of eventual single releases in albums and EPs
 - Binary package
