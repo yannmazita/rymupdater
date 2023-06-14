@@ -3,6 +3,7 @@ from src.data.webDao import RYMdata
 import src.application.domain as domain
 
 from pathlib import Path
+from datetime import datetime
 
 
 class RYMupdater:
@@ -121,12 +122,12 @@ class RYMupdater:
         assert self.__rymData is not None
         return self.__rymData.getIssueCredits(issueUrl)
 
-    def __separateIssueDetails(
+    def __formatLabelAndLabelID(
         self, retrievedTags: dict[domain.RYMtags, str]
     ) -> dict[domain.RYMtags, str]:
-        """Separates label name from label id.
+        """Formats LABEL and LABEL_ID entries in RYMtags dictionnary.
 
-        Both label and label id get retrieved in the same RYMtags element from the Internet.
+        Both label and label id get retrieved in the same RYMtags element from rateyourmusic.com.
         This method ensures the dictionnary making up the retrieved tags has both of them
         with their own key.
 
@@ -141,6 +142,40 @@ class RYMupdater:
         updatedDictionnary.pop(domain.RYMtags.LABEL_AND_LABEL_ID)
         updatedDictionnary[domain.RYMtags.LABEL] = labelSplit[0]
         updatedDictionnary[domain.RYMtags.LABEL_ID] = labelSplit[1]
+        return updatedDictionnary
+
+    def __formatReleaseAndRecordingTime(
+        self, retrievedTags: dict[domain.RYMtags, str]
+    ) -> dict[domain.RYMtags, str]:
+        """Formats RELEASE_TIME and RECORDING_TIME entries in RYMtags dictionnary.
+
+        Both release and recording might get retrieved in various
+        date formats from rateyourmusic.com. This method ensures the dictionnary
+        making up the retrieved tags has a standard date format for both.
+        """
+        updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
+        for key in (domain.RYMtags.RELEASE_TIME, domain.RYMtags.RECORDING_TIME):
+            rDate: str = updatedDictionnary[key]
+            if not rDate.isdigit():
+                pass
+        return updatedDictionnary
+
+    def __formatTagDictionnary(
+        self, retrievedTags: dict[domain.RYMtags, str]
+    ) -> dict[domain.RYMtags, str]:
+        """Formats tags retrieved from rateyourmusic.com.
+
+        RYMtags dictionnaries may not have the expected format. This method ensures that each
+        RYMtags pair can be successfully mapped to an ID3Keys pair with usual formating.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from rateyourmusic.com.
+        Returns:
+            The formated dictionnary.
+        """
+        updatedDictionnary: dict[domain.RYMtags, str] = self.__formatLabelAndLabelID(
+            self.__formatReleaseAndRecordingTime(retrievedTags)
+        )
         return updatedDictionnary
 
     def tagLibrary(self, musicDirectory: Path) -> None:
@@ -165,7 +200,7 @@ class RYMupdater:
                 currentRelease = release
                 currentReleaseUrl = self.__getReleaseURL(artist, release)
                 currentIssueUrl: str = self.__getIssueURLs(currentReleaseUrl)[0]
-            tags: dict[domain.RYMtags, str] = self.__separateIssueDetails(
+            tags: dict[domain.RYMtags, str] = self.__formatTagDictionnary(
                 self.__getIssueTags(currentIssueUrl)
             )
 
