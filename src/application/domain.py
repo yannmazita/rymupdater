@@ -40,7 +40,6 @@ class ID3Keys(Enum):
 
 class RYMtags(Enum):
     ARTIST = "Artist"
-    DATE = "Released"
     GENRE = "Genres"
     DESCRIPTION = "Descriptors"
     LANGUAGE = "Language"

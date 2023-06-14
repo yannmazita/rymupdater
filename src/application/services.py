@@ -169,9 +169,5 @@ class RYMupdater:
                 self.__getIssueTags(currentIssueUrl)
             )
 
-            # for rymTag in tags:
-            #     self.__updateFileTag(domain.ID3Keys(rymTag.name), tags[rymTag])
-
-
-rym = RYMupdater()
-rym.tagLibrary(Path("/home/yann/music"))
+            for rymTag in tags:
+                self.__updateFileTag(domain.ID3Keys[rymTag.name], tags[rymTag])
