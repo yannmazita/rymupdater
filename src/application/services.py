@@ -152,15 +152,26 @@ class RYMupdater:
             None
         """
         self.__initializeData(musicDirectory)
+        currentArtist: str = ""
+        currentRelease: str = ""
+        currentReleaseUrl: str = ""
+        currentIssueUrl: str = ""
         while self.__loadNextFile() is not False:
             initialTags: dict[domain.ID3Keys, list[str]] = self.__getTagsFromFile()
             artist: str = initialTags[domain.ID3Keys.ARTIST][0]
             release: str = initialTags[domain.ID3Keys.ALBUM][0]
-            releaseUrl: str = self.__getReleaseURL(artist, release)
-            issueUrl: str = self.__getIssueURLs(releaseUrl)[0]
+            if (artist != currentArtist) or (release != currentRelease):
+                currentArtist = artist
+                currentRelease = release
+                currentReleaseUrl = self.__getReleaseURL(artist, release)
+                currentIssueUrl: str = self.__getIssueURLs(currentReleaseUrl)[0]
             tags: dict[domain.RYMtags, str] = self.__separateIssueDetails(
-                self.__getIssueTags(issueUrl)
+                self.__getIssueTags(currentIssueUrl)
             )
 
-            for rymTag in tags:
-                self.__updateFileTag(domain.ID3Keys(rymTag.name), tags[rymTag])
+            # for rymTag in tags:
+            #     self.__updateFileTag(domain.ID3Keys(rymTag.name), tags[rymTag])
+
+
+rym = RYMupdater()
+rym.tagLibrary(Path("/home/yann/music"))
