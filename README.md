@@ -5,6 +5,7 @@ Work in progress.
 
 ## Dependencies
 
+- chromium
 - python >= 3.10
 - mutagen = 1.46.0
 - selenium = 4.8.3
@@ -25,3 +26,8 @@ Dependencies defined in requirements.txt can be installed in a virtual environme
 ```commandline
 python -m pip install -r requirements.txt
 ```
+
+## Todo
+- GUI
+- Handling of eventual single releases in albums and EPs
+- Binary package
