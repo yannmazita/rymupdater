@@ -5,7 +5,6 @@ from mutagen.id3._frames import (
     TIT2,
     TIT3,
     TPE1,
-    TOPE,
     TPE2,
     TPE3,
     TPE4,
@@ -30,6 +29,8 @@ from mutagen.id3._frames import (
     TMED,
     TCMP,
     COMM,
+    TSOP,
+    POPM
 )
 
 from src.application.domain import ID3Keys
@@ -49,6 +50,7 @@ class FileData:
             musicDirectory: The path of the music directory.
         """
         # self.__paths: Iterator[Path] = iter([])
+        self.__currentPath: Path = Path("")
         self.__paths: Iterator[Path] = Path(musicDirectory).rglob("*.mp3")
         self.__currentMP3File: ID3 = ID3()
 
@@ -59,11 +61,11 @@ class FileData:
             A boolean, true if file was loaded, false otherwise.
         """
         try:
-            path: str = str(next(self.__paths))
+            self.__currentPath = Path(next(self.__paths))
         except StopIteration:
             return False
 
-        self.__currentMP3File = ID3(path)
+        self.__currentMP3File = ID3(self.__currentPath)
 
         return True
 
@@ -77,7 +79,7 @@ class FileData:
         tags: dict[ID3Keys, list[str]] = {}
 
         for frame in ID3Keys:
-            tags[frame] = self.__currentMP3File.getall(frame.value)
+            tags[frame] = list(map(str, self.__currentMP3File.getall(frame.value)))
 
         return tags
 
@@ -100,10 +102,18 @@ class FileData:
                 self.__currentMP3File.add(TIT3(encoding=3, text=["" + value + ""]))
             case ID3Keys.ARTIST:
                 self.__currentMP3File.add(TPE1(encoding=3, text=["" + value + ""]))
+            case ID3Keys.ARTIST_SORT:
+                self.__currentMP3File.add(TSOP(encoding=3, text=["" + value + ""]))
             case ID3Keys.PERFORMER:
-                self.__currentMP3File.add(TOPE(encoding=3, text=["" + value + ""]))
-            case ID3Keys.BAND:
                 self.__currentMP3File.add(TPE2(encoding=3, text=["" + value + ""]))
+            case ID3Keys.PERFORMER_SORT:
+                self.__currentMP3File.add(
+                    TXXX(
+                        encoding=3,
+                        desc="QuodLibet::performersort",
+                        text=["" + value + ""],
+                    )
+                )
             case ID3Keys.CONDUCTOR:
                 self.__currentMP3File.add(TPE3(encoding=3, text=["" + value + ""]))
             case ID3Keys.INTERPRETER_REMIXER:
@@ -170,8 +180,7 @@ class FileData:
                 self.__currentMP3File.add(
                     COMM(encoding=3, lang="eng", desc="desc", text=["" + value + ""])
                 )
+            case ID3Keys.TEST:
+                pass
 
         self.__currentMP3File.save()
-
-
-# data = FileData(Path("/home/yann/music"))

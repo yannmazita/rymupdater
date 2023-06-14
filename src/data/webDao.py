@@ -130,7 +130,7 @@ class RYMdata:
             corresponding value. For example the primary issue of The Knife - Silent Shout":
 
                 {<RYMtags.ARTIST: 'Artist'>: 'The Knife',
-                 <RYMtags.DATE: 'Released'>: '20 March 2006',
+                 <RYMtags.RELEASE_TIME: 'Released'>: '20 March 2006',
                  <RYMtags.RECORDING_TIME: 'Recorded'>: 'March 2004 - November 2005',
                  ...,
                  <RYMtags.LANGUAGE: 'Language'>: 'English'}
