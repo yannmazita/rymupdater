@@ -8,6 +8,7 @@ Work in progress.
 - chromium
 - python >= 3.10
 - mutagen = 1.46.0
+- jellyfish = 0.11.2
 - selenium = 4.8.3
 - webdriver-manager = 3.8.5
 
