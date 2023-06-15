@@ -152,6 +152,11 @@ class RYMupdater:
         The release time might get retrieved in various date formats from rateyourmusic.com.
         This method ensures the dictionnary making up the retrieved tags has
         a standard date format for the release time.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from rateyourmusic.com.
+        Returns:
+            The formated dictionnary.
         """
         updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
         rDate: str = updatedDictionnary[domain.RYMtags.RELEASE_TIME]
