@@ -29,6 +29,6 @@ python -m pip install -r requirements.txt
 ## Todo
 - GUI
 - Credit tagging
-- Release and recording time format standardisation
+- Handling of different user locales when scrapping dates
 - Handling of eventual single releases in albums and EPs
 - Binary package

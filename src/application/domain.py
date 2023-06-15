@@ -18,8 +18,8 @@ class ID3Keys(Enum):
     ALBUM = "TALB"
     ALBUM_SORT_ORDER = "TSOA"
     DISC_SUBTITLE = "TSST"  # Set subtitle.
-    RECORDING_TIME = "TDRC"
-    RELEASE_TIME = "TDRL"
+    # RECORDING_TIME = "TDRC"
+    RELEASE_TIME = "TDRC"   # Should be TDRL but, TDRC is used by every media player.
     GENRE = "TCON"
     DESCRIPTION = "TXXX:QuodLibet::description"
     LANGUAGE = "TLAN"
@@ -43,8 +43,8 @@ class RYMtags(Enum):
     GENRE = "Genres"
     DESCRIPTION = "Descriptors"
     LANGUAGE = "Language"
-    RECORDING_TIME = "Recorded"
+    # RECORDING_TIME = "Recorded"
     RELEASE_TIME = "Released"
     LABEL_AND_LABEL_ID = "Issue details"    # Format: "LABEL / LABEL_ID /"
-    LABEL = "not-used"  # Is not found individually on the webpage
-    LABEL_ID = "not-used"  # Is not found individually on the webpage
+    LABEL = "not-used-label"  # Is not found individually on the webpage
+    LABEL_ID = "not-used-label-id"  # Is not found individually on the webpage

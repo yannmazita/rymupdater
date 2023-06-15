@@ -17,7 +17,6 @@ from mutagen.id3._frames import (
     TSOA,
     TSST,
     TDRC,
-    TDRL,
     TCON,
     TLAN,
     TCOM,
@@ -140,10 +139,8 @@ class FileData:
                 self.__currentMP3File.add(TSOA(encoding=3, text=["" + value + ""]))
             case ID3Keys.DISC_SUBTITLE:
                 self.__currentMP3File.add(TSST(encoding=3, text=["" + value + ""]))
-            case ID3Keys.RECORDING_TIME:
-                self.__currentMP3File.add(TDRC(encoding=3, text=["" + value + ""]))
             case ID3Keys.RELEASE_TIME:
-                self.__currentMP3File.add(TDRL(encoding=3, text=["" + value + ""]))
+                self.__currentMP3File.add(TDRC(encoding=3, text=["" + value + ""]))
             case ID3Keys.GENRE:
                 self.__currentMP3File.add(TCON(encoding=3, text=["" + value + ""]))
             case ID3Keys.DESCRIPTION:

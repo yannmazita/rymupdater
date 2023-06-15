@@ -144,20 +144,21 @@ class RYMupdater:
         updatedDictionnary[domain.RYMtags.LABEL_ID] = labelSplit[1]
         return updatedDictionnary
 
-    def __formatReleaseAndRecordingTime(
+    def __formatReleaseTime(
         self, retrievedTags: dict[domain.RYMtags, str]
     ) -> dict[domain.RYMtags, str]:
-        """Formats RELEASE_TIME and RECORDING_TIME entries in RYMtags dictionnary.
+        """Formats RELEASE_TIME entry in RYMtags dictionnary.
 
-        Both release and recording might get retrieved in various
-        date formats from rateyourmusic.com. This method ensures the dictionnary
-        making up the retrieved tags has a standard date format for both.
+        The release time might get retrieved in various date formats from rateyourmusic.com.
+        This method ensures the dictionnary making up the retrieved tags has
+        a standard date format for the release time.
         """
         updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
-        for key in (domain.RYMtags.RELEASE_TIME, domain.RYMtags.RECORDING_TIME):
-            rDate: str = updatedDictionnary[key]
-            if not rDate.isdigit():
-                pass
+        rDate: str = updatedDictionnary[domain.RYMtags.RELEASE_TIME]
+        if not rDate.isdigit():
+            updatedDictionnary[domain.RYMtags.RELEASE_TIME] = datetime.strptime(
+                rDate, "%d %B %Y"
+            ).strftime("%d-%m-%Y")
         return updatedDictionnary
 
     def __formatTagDictionnary(
@@ -174,7 +175,7 @@ class RYMupdater:
             The formated dictionnary.
         """
         updatedDictionnary: dict[domain.RYMtags, str] = self.__formatLabelAndLabelID(
-            self.__formatReleaseAndRecordingTime(retrievedTags)
+            self.__formatReleaseTime(retrievedTags)
         )
         return updatedDictionnary
 
