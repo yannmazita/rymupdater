@@ -5,7 +5,7 @@ class ID3Keys(Enum):
     TITLE = "TIT2"
     TRACK_SUBTITLE = "TIT3"
     ARTIST = "TPE1"
-    ARTIST_SORT = "TSOP"    # Should "performer sort" but shows up as "artistsort in Quod Libet
+    ARTIST_SORT = "TSOP"    # Should be "performer sort" but shows up as "artistsort in Quod Libet
     PERFORMER = "TPE2"  # Should be "band" but shows up as performer in Quod Libet
     PERFORMER_SORT = "TXXX:QuodLibet::performersort"
     CONDUCTOR = "TPE3"  # classical music
@@ -19,7 +19,7 @@ class ID3Keys(Enum):
     ALBUM_SORT_ORDER = "TSOA"
     DISC_SUBTITLE = "TSST"  # Set subtitle.
     # RECORDING_TIME = "TDRC"
-    RELEASE_TIME = "TDRC"   # Should be TDRL but, TDRC is used by every media player.
+    RELEASE_TIME = "TDRC"   # Should be TDRL but TDRC is used by every media player.
     GENRE = "TCON"
     DESCRIPTION = "TXXX:QuodLibet::description"
     LANGUAGE = "TLAN"
