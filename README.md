@@ -31,4 +31,7 @@ python -m pip install -r requirements.txt
 - Credit tagging
 - Handling of different user locales when scrapping dates
 - Handling of eventual single releases in albums and EPs
+- Handling of sorting tags
+- Use of ISO 639-2/B codes for the language tags
 - Binary package
+- (Vorbis)
