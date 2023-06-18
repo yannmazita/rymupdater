@@ -28,6 +28,7 @@ python -m pip install -r requirements.txt
 ```
 
 ## Todo
+- CLI
 - GUI
 - Credit tagging
 - Handling of different user locales when scrapping dates
