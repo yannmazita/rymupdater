@@ -191,7 +191,7 @@ class RYMupdater:
         Args:
             musicDirectory: The path of the music directory.
         Returns:
-            None
+            Iterator of audio file paths.
         """
         self.__initializeData(musicDirectory)
         currentArtist: str = ""
