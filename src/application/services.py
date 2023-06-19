@@ -4,6 +4,7 @@ import src.application.domain as domain
 
 from pathlib import Path
 from datetime import datetime
+from collections.abc import Iterator
 
 
 class RYMupdater:
@@ -184,13 +185,13 @@ class RYMupdater:
         )
         return updatedDictionnary
 
-    def tagLibrary(self, musicDirectory: Path) -> None:
+    def tagLibrary(self, musicDirectory: Path) -> Iterator[Path]:
         """Tags every .mp3 file in the music library.
 
         Args:
             musicDirectory: The path of the music directory.
         Returns:
-            None
+            Iterator of audio file paths.
         """
         self.__initializeData(musicDirectory)
         currentArtist: str = ""
@@ -198,6 +199,9 @@ class RYMupdater:
         currentReleaseUrl: str = ""
         currentIssueUrl: str = ""
         while self.__loadNextFile() is not False:
+            assert self.__fileData is not None
+            yield self.__fileData.currentFilePath
+
             initialTags: dict[domain.ID3Keys, list[str]] = self.__getTagsFromFile()
             artist: str = initialTags[domain.ID3Keys.ARTIST][0]
             release: str = initialTags[domain.ID3Keys.ALBUM][0]

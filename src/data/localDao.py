@@ -49,9 +49,14 @@ class FileData:
             musicDirectory: The path of the music directory.
         """
         # self.__paths: Iterator[Path] = iter([])
-        self.__currentPath: Path = Path("")
+        self.__currentFilePath: Path = Path("")
         self.__paths: Iterator[Path] = Path(musicDirectory).rglob("*.mp3")
         self.__currentMP3File: ID3 = ID3()
+
+    @property
+    def currentFilePath(self) -> Path:
+        """File path of current audio file"""
+        return self.__currentFilePath
 
     def loadNextFile(self) -> bool:
         """Loads next audio file from paths in FileData instance.
@@ -60,11 +65,11 @@ class FileData:
             A boolean, true if file was loaded, false otherwise.
         """
         try:
-            self.__currentPath = Path(next(self.__paths))
+            self.__currentFilePath = Path(next(self.__paths))
         except StopIteration:
             return False
 
-        self.__currentMP3File = ID3(self.__currentPath)
+        self.__currentMP3File = ID3(self.__currentFilePath)
 
         return True
 
