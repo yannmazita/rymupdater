@@ -167,6 +167,25 @@ class RYMupdater:
             ).strftime("%d-%m-%Y")
         return updatedDictionnary
 
+    def __formatLanguageCode(
+        self, retrievedTags: dict[domain.RYMtags, str]
+    ) -> dict[domain.RYMtags, str]:
+        """Formats LANGUAGE entry in RYMtags dictionnary.
+
+        The issue language is retrieved in full form instead of the of the ISO 639-2
+        standard for language codes.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from rateyourmusic.com.
+        Returns:
+            The formated dictionnary.
+        """
+        updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
+        longLanguageFormat: str = updatedDictionnary[domain.RYMtags.LANGUAGE]
+        iso6392LanguageFormat: str = domain.Iso6392Codes[longLanguageFormat].value
+        updatedDictionnary[domain.RYMtags.LANGUAGE] = iso6392LanguageFormat
+        return updatedDictionnary
+
     def __formatTagDictionnary(
         self, retrievedTags: dict[domain.RYMtags, str]
     ) -> dict[domain.RYMtags, str]:
@@ -180,8 +199,8 @@ class RYMupdater:
         Returns:
             The formated dictionnary.
         """
-        updatedDictionnary: dict[domain.RYMtags, str] = self.__formatLabelAndLabelID(
-            self.__formatReleaseTime(retrievedTags)
+        updatedDictionnary: dict[domain.RYMtags, str] = self.__formatLanguageCode(
+            self.__formatLabelAndLabelID(self.__formatReleaseTime(retrievedTags))
         )
         return updatedDictionnary
 
