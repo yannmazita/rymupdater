@@ -186,7 +186,7 @@ class RYMupdater:
         updatedDictionnary[domain.RYMtags.LANGUAGE] = iso6392LanguageFormat
         return updatedDictionnary
 
-    def __formatTagDictionnary(
+    def __formatRYMTagsDictionnary(
         self, retrievedTags: dict[domain.RYMtags, str]
     ) -> dict[domain.RYMtags, str]:
         """Formats tags retrieved from rateyourmusic.com.
@@ -201,6 +201,72 @@ class RYMupdater:
         """
         updatedDictionnary: dict[domain.RYMtags, str] = self.__formatLanguageCode(
             self.__formatLabelAndLabelID(self.__formatReleaseTime(retrievedTags))
+        )
+        return updatedDictionnary
+
+    def __formatSortingTags(
+        self, retrievedTags: dict[domain.ID3Keys, list[str]]
+    ) -> dict[domain.ID3Keys, list[str]]:
+        """Formats sorting entries in ID3Keys dictionnary.
+
+        By default sorting tags are not populated. This method ensures that each sorting
+        tag has the correct value.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from the MP3 file.
+        Returns:
+            The formated dictionnary.
+        """
+        updatedDictionnary: dict[domain.ID3Keys, list[str]] = retrievedTags
+        artistSort: str = updatedDictionnary[domain.ID3Keys.ARTIST][0].replace("The", "")
+        performerSort: str = updatedDictionnary[domain.ID3Keys.PERFORMER][0].replace(
+            "The", ""
+        )
+        albumArtistSort: str = updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST][0].replace(
+            "The", ""
+        )
+        albumSort: str = updatedDictionnary[domain.ID3Keys.ALBUM][0].replace("The", "")
+        try:
+            composerSort: str = updatedDictionnary[domain.ID3Keys.COMPOSER][0].replace(
+                "The", ""
+            )
+        except IndexError:
+            pass
+
+        try:
+            updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
+        except IndexError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
+        except IndexError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
+        except IndexError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
+        except IndexError:
+            updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
+            pass
+        return updatedDictionnary
+
+    def __formatID3KeysTagDictionnary(
+        self, retrievedTags: dict[domain.ID3Keys, list[str]]
+    ) -> dict[domain.ID3Keys, list[str]]:
+        """Formats tags retrieved from audio file.
+
+        Tags in audio files may miss sorting keys or other tags. This method ensures
+        id3 keys are properly populated.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from the MP3 file.
+        Returns:
+            The formated dictionnary.
+        """
+        updatedDictionnary: dict[domain.ID3Keys, list[str]] = self.__formatSortingTags(
+            retrievedTags
         )
         return updatedDictionnary
 
@@ -229,9 +295,15 @@ class RYMupdater:
                 currentRelease = release
                 currentReleaseUrl = self.__getReleaseURL(artist, release)
                 currentIssueUrl: str = self.__getIssueURLs(currentReleaseUrl)[0]
-            tags: dict[domain.RYMtags, str] = self.__formatTagDictionnary(
+
+            rymTags: dict[domain.RYMtags, str] = self.__formatRYMTagsDictionnary(
                 self.__getIssueTags(currentIssueUrl)
             )
+            for rymTag in rymTags:
+                self.__updateFileTag(domain.ID3Keys[rymTag.name], rymTags[rymTag])
 
-            for rymTag in tags:
-                self.__updateFileTag(domain.ID3Keys[rymTag.name], tags[rymTag])
+            id3Tags: dict[domain.ID3Keys, list[str]] = self.__formatID3KeysTagDictionnary(
+                initialTags
+            )
+            for id3Tag in id3Tags:
+                self.__updateFileTag(id3Tag, id3Tags[id3Tag][0])
