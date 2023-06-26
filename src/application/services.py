@@ -218,6 +218,12 @@ class RYMupdater:
             The formated dictionnary.
         """
         updatedDictionnary: dict[domain.ID3Keys, list[str]] = retrievedTags
+
+        for sortKey in ["PERFORMER", "ALBUM_ARTIST", "COMPOSER"]:
+            updatedDictionnary.setdefault(domain.ID3Keys[sortKey], [])
+
+        # domain.ID3Keys.XXXX might be an empty list, in that case this block will crash
+        # needs to be fixed
         artistSort: str = updatedDictionnary[domain.ID3Keys.ARTIST][0].replace("The", "")
         performerSort: str = updatedDictionnary[domain.ID3Keys.PERFORMER][0].replace(
             "The", ""
@@ -226,30 +232,15 @@ class RYMupdater:
             "The", ""
         )
         albumSort: str = updatedDictionnary[domain.ID3Keys.ALBUM][0].replace("The", "")
-        try:
-            composerSort: str = updatedDictionnary[domain.ID3Keys.COMPOSER][0].replace(
-                "The", ""
-            )
-        except IndexError:
-            pass
+        composerSort: str = updatedDictionnary[domain.ID3Keys.COMPOSER][0].replace(
+            "The", ""
+        )
 
-        try:
-            updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
-        except IndexError:
-            pass
-        try:
-            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
-        except IndexError:
-            pass
-        try:
-            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
-        except IndexError:
-            pass
-        try:
-            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
-        except IndexError:
-            updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
-            pass
+        updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
+        updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
+        updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
+        updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
+        updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
         return updatedDictionnary
 
     def __formatID3KeysTagDictionnary(
