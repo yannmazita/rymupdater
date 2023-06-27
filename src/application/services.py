@@ -5,6 +5,7 @@ import src.application.domain as domain
 from pathlib import Path
 from datetime import datetime
 from collections.abc import Iterator
+import re
 
 
 class RYMupdater:
@@ -222,25 +223,60 @@ class RYMupdater:
         for sortKey in ["PERFORMER", "ALBUM_ARTIST", "COMPOSER"]:
             updatedDictionnary.setdefault(domain.ID3Keys[sortKey], [])
 
-        # domain.ID3Keys.XXXX might be an empty list, in that case this block will crash
-        # needs to be fixed
-        artistSort: str = updatedDictionnary[domain.ID3Keys.ARTIST][0].replace("The", "")
-        performerSort: str = updatedDictionnary[domain.ID3Keys.PERFORMER][0].replace(
-            "The", ""
-        )
-        albumArtistSort: str = updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST][0].replace(
-            "The", ""
-        )
-        albumSort: str = updatedDictionnary[domain.ID3Keys.ALBUM][0].replace("The", "")
-        composerSort: str = updatedDictionnary[domain.ID3Keys.COMPOSER][0].replace(
-            "The", ""
-        )
+        artist: str = updatedDictionnary[domain.ID3Keys.ARTIST][0]
 
-        updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
-        updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
-        updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
-        updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
-        updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
+        if len(updatedDictionnary[domain.ID3Keys.PERFORMER]) == 0:
+            updatedDictionnary[domain.ID3Keys.PERFORMER].append(artist)
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.PERFORMER][0]):
+            performerSort: str = updatedDictionnary[domain.ID3Keys.PERFORMER][0].replace(
+                "The ", "", 1
+            )
+        else:
+            pass
+
+        if len(updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST]) == 0:
+            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST].append(artist)
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST][0]):
+            albumArtistSort: str = updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST][0].replace(
+                "The ", "", 1
+            )
+        else:
+            pass
+
+        if len(updatedDictionnary[domain.ID3Keys.COMPOSER]) == 0:
+            pass
+        else:
+            if re.search("^The ", updatedDictionnary[domain.ID3Keys.COMPOSER][0]):
+                composerSort: str = updatedDictionnary[domain.ID3Keys.COMPOSER][0].replace(
+                    "The ", "", 1
+                )
+
+        # Files are expected to have at least artist and album tags.
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.ARTIST][0]):
+            artistSort: str = updatedDictionnary[domain.ID3Keys.ARTIST][0].replace("The ", "")
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.ALBUM][0]):
+            albumSort: str = updatedDictionnary[domain.ID3Keys.ALBUM][0].replace("The ", "")
+
+        try:
+            updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
+        except IndexError:
+            updatedDictionnary[domain.ID3Keys.ARTIST_SORT].append(artistSort)
+        try:
+            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
+        except IndexError:
+            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER].append(albumSort)
+        try:
+            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
+        except IndexError:
+            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT].append(performerSort)
+        try:
+            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
+        except IndexError:
+            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER].append(albumArtistSort)
+        try:
+            updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
+        except UnboundLocalError:
+            pass
         return updatedDictionnary
 
     def __formatID3KeysTagDictionnary(
@@ -297,4 +333,7 @@ class RYMupdater:
                 initialTags
             )
             for id3Tag in id3Tags:
-                self.__updateFileTag(id3Tag, id3Tags[id3Tag][0])
+                try:
+                    self.__updateFileTag(id3Tag, id3Tags[id3Tag][0])
+                except IndexError:
+                    pass
