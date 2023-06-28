@@ -258,23 +258,39 @@ class RYMupdater:
             albumSort: str = updatedDictionnary[domain.ID3Keys.ALBUM][0].replace("The ", "")
 
         try:
-            updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
-        except IndexError:
-            updatedDictionnary[domain.ID3Keys.ARTIST_SORT].append(artistSort)
+            try:
+                updatedDictionnary[domain.ID3Keys.ARTIST_SORT][0] = artistSort
+            except IndexError:
+                updatedDictionnary[domain.ID3Keys.ARTIST_SORT].append(artistSort)
+        except UnboundLocalError:
+            pass
+
         try:
-            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
-        except IndexError:
-            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER].append(albumSort)
+            try:
+                updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER][0] = albumSort
+            except IndexError:
+                updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER].append(albumSort)
+        except UnboundLocalError:
+            pass
         try:
-            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
-        except IndexError:
-            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT].append(performerSort)
+            try:
+                updatedDictionnary[domain.ID3Keys.PERFORMER_SORT][0] = performerSort
+            except IndexError:
+                updatedDictionnary[domain.ID3Keys.PERFORMER_SORT].append(performerSort)
+        except UnboundLocalError:
+            pass
         try:
-            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
-        except IndexError:
-            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER].append(albumArtistSort)
+            try:
+                updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER][0] = albumArtistSort
+            except IndexError:
+                updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER].append(albumArtistSort)
+        except UnboundLocalError:
+            pass
         try:
-            updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
+            try:
+                updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER][0] = composerSort
+            except IndexError:
+                updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER].append(composerSort)
         except UnboundLocalError:
             pass
         return updatedDictionnary
