@@ -84,7 +84,7 @@ class FileData:
 
         for frame in ID3Keys:
             try:
-                tags[frame] = str(self.__currentMP3File.getall(frame.value))
+                tags[frame] = list(map(str, self.__currentMP3File.getall(frame.value)))[0]
             except IndexError:
                 pass
 
