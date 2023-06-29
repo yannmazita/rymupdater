@@ -39,6 +39,5 @@ Use full paths.
 - Credit tagging
 - Handling of different user locales when scrapping dates
 - Handling of eventual single releases in albums and EPs
-- Handling of sorting tags
 - Binary package
 - (Vorbis)
