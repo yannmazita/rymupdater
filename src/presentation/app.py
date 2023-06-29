@@ -1,6 +1,5 @@
 import sys
 
-from src.application.services import RYMupdater
 from src.presentation.cli import Cli
 
 

@@ -61,9 +61,7 @@ class RYMupdater:
         self.__fileData.updateFileTag(frame, value)
 
     def __updateTags(
-        self,
-        rymTags: dict[domain.RYMtags, str],
-        id3Tags: dict[domain.ID3Keys, str],
+        self, rymTags: dict[domain.RYMtags, str], id3Tags: dict[domain.ID3Keys, str]
     ) -> None:
         """Updates ID3 frames in loaded file using rymTags and id3Tags.
 
@@ -73,6 +71,8 @@ class RYMupdater:
         Args:
             rymTags: The dictionnary of tags retrieved from RYM.
             id3Tags: The dictionnary of tags retrieved from the mp3 file.
+        Returns:
+            None.
         """
         combinedDictionnary: dict[str, str] = {}
         for tag in id3Tags:
@@ -357,12 +357,4 @@ class RYMupdater:
                 initialTags
             )
 
-            # for rymTag in rymTags:
-            #     self.__updateFileTag(domain.ID3Keys[rymTag.name], rymTags[rymTag])
-
-            # for id3Tag in id3Tags:
-            #     try:
-            #         self.__updateFileTag(id3Tag, id3Tags[id3Tag])
-            #     except IndexError:
-            #         pass
             self.__updateTags(rymTags, id3Tags)

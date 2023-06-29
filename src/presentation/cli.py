@@ -6,6 +6,7 @@ from collections.abc import Iterator
 
 class Cli():
     def __init__(self, musicDirectory: str):
+        """CLI main services"""
         self.__rym: RYMupdater = RYMupdater()
         self.__filePaths: Iterator[Path] = self.__rym.tagLibrary(Path(musicDirectory))
 
