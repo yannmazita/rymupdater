@@ -73,17 +73,20 @@ class FileData:
 
         return True
 
-    def getTagsFromFile(self) -> dict[ID3Keys, list[str]]:
+    def getTagsFromFile(self) -> dict[ID3Keys, str]:
         """Gets ID3 tags from loaded file.
 
         Returns:
             A dictionnary {key: value} where key is an ID3Keys member and value
-            a list of ID3 frames with the given name.
+            the first ID3 frame with the given name.
         """
-        tags: dict[ID3Keys, list[str]] = {}
+        tags: dict[ID3Keys, str] = {}
 
         for frame in ID3Keys:
-            tags[frame] = list(map(str, self.__currentMP3File.getall(frame.value)))
+            try:
+                tags[frame] = list(map(str, self.__currentMP3File.getall(frame.value)))[0]
+            except IndexError:
+                pass
 
         return tags
 

@@ -5,6 +5,7 @@ import src.application.domain as domain
 from pathlib import Path
 from datetime import datetime
 from collections.abc import Iterator
+import re
 
 
 class RYMupdater:
@@ -35,12 +36,12 @@ class RYMupdater:
         assert self.__fileData is not None
         return self.__fileData.loadNextFile()
 
-    def __getTagsFromFile(self) -> dict[domain.ID3Keys, list[str]]:
+    def __getTagsFromFile(self) -> dict[domain.ID3Keys, str]:
         """Gets ID3 tags from loaded file.
 
         Returns:
             A dictionnary {key: value} where key is an ID3Keys member and value
-            a list of ID3 frames with the given name.
+            the first ID3 frame with the given name.
         """
         assert self.__fileData is not None
         return self.__fileData.getTagsFromFile()
@@ -58,6 +59,29 @@ class RYMupdater:
         """
         assert self.__fileData is not None
         self.__fileData.updateFileTag(frame, value)
+
+    def __updateTags(
+        self,
+        rymTags: dict[domain.RYMtags, str],
+        id3Tags: dict[domain.ID3Keys, str],
+    ) -> None:
+        """Updates ID3 frames in loaded file using rymTags and id3Tags.
+
+        This will iterate through the keys in the dictionnaries and update the file
+        accordingly.
+
+        Args:
+            rymTags: The dictionnary of tags retrieved from RYM.
+            id3Tags: The dictionnary of tags retrieved from the mp3 file.
+        """
+        combinedDictionnary: dict[str, str] = {}
+        for tag in id3Tags:
+            combinedDictionnary[tag.name] = id3Tags[tag]
+        for tag in rymTags:
+            combinedDictionnary[tag.name] = rymTags[tag]
+
+        for tag in combinedDictionnary:
+            self.__updateFileTag(domain.ID3Keys[tag], combinedDictionnary[tag])
 
     def __getReleaseURL(self, artist: str, release: str) -> str:
         """Gets release URL from first match in RYM search.
@@ -186,7 +210,7 @@ class RYMupdater:
         updatedDictionnary[domain.RYMtags.LANGUAGE] = iso6392LanguageFormat
         return updatedDictionnary
 
-    def __formatTagDictionnary(
+    def __formatRYMTagsDictionnary(
         self, retrievedTags: dict[domain.RYMtags, str]
     ) -> dict[domain.RYMtags, str]:
         """Formats tags retrieved from rateyourmusic.com.
@@ -201,6 +225,102 @@ class RYMupdater:
         """
         updatedDictionnary: dict[domain.RYMtags, str] = self.__formatLanguageCode(
             self.__formatLabelAndLabelID(self.__formatReleaseTime(retrievedTags))
+        )
+        return updatedDictionnary
+
+    def __formatSortingTags(
+        self, retrievedTags: dict[domain.ID3Keys, str]
+    ) -> dict[domain.ID3Keys, str]:
+        """Formats sorting entries in ID3Keys dictionnary.
+
+        By default sorting tags are not populated. This method ensures that each sorting
+        tag has the correct value.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from the MP3 file.
+        Returns:
+            The formated dictionnary.
+        """
+        updatedDictionnary: dict[domain.ID3Keys, str] = retrievedTags
+
+        for sortKey in ["PERFORMER", "ALBUM_ARTIST", "COMPOSER"]:
+            updatedDictionnary.setdefault(domain.ID3Keys[sortKey], "")
+
+        artist: str = updatedDictionnary[domain.ID3Keys.ARTIST]
+
+        if len(updatedDictionnary[domain.ID3Keys.PERFORMER]) == 0:
+            updatedDictionnary[domain.ID3Keys.PERFORMER] = artist
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.PERFORMER]):
+            performerSort: str = updatedDictionnary[domain.ID3Keys.PERFORMER][
+                0
+            ].replace("The ", "", 1)
+        else:
+            pass
+
+        if len(updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST]) == 0:
+            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST] = artist
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST]):
+            albumArtistSort: str = updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST][
+                0
+            ].replace("The ", "", 1)
+        else:
+            pass
+
+        if len(updatedDictionnary[domain.ID3Keys.COMPOSER]) == 0:
+            pass
+        else:
+            if re.search("^The ", updatedDictionnary[domain.ID3Keys.COMPOSER]):
+                composerSort: str = updatedDictionnary[domain.ID3Keys.COMPOSER][
+                    0
+                ].replace("The ", "", 1)
+
+        # Files are expected to have at least artist and album tags.
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.ARTIST]):
+            artistSort: str = updatedDictionnary[domain.ID3Keys.ARTIST].replace(
+                "The ", ""
+            )
+        if re.search("^The ", updatedDictionnary[domain.ID3Keys.ALBUM]):
+            albumSort: str = updatedDictionnary[domain.ID3Keys.ALBUM].replace(
+                "The ", ""
+            )
+
+        try:
+            updatedDictionnary[domain.ID3Keys.ARTIST_SORT] = artistSort
+        except UnboundLocalError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.ALBUM_SORT_ORDER] = albumSort
+        except UnboundLocalError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.PERFORMER_SORT] = performerSort
+        except UnboundLocalError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.ALBUM_ARTIST_SORT_ORDER] = albumArtistSort
+        except UnboundLocalError:
+            pass
+        try:
+            updatedDictionnary[domain.ID3Keys.COMPOSER_SORT_ORDER] = composerSort
+        except UnboundLocalError:
+            pass
+        return updatedDictionnary
+
+    def __formatID3KeysTagDictionnary(
+        self, retrievedTags: dict[domain.ID3Keys, str]
+    ) -> dict[domain.ID3Keys, str]:
+        """Formats tags retrieved from audio file.
+
+        Tags in audio files may miss sorting keys or other tags. This method ensures
+        id3 keys are properly populated.
+
+        Args:
+            retrievedTags: The dictionnary of tags retrieved from the MP3 file.
+        Returns:
+            The formated dictionnary.
+        """
+        updatedDictionnary: dict[domain.ID3Keys, str] = self.__formatSortingTags(
+            retrievedTags
         )
         return updatedDictionnary
 
@@ -221,17 +341,28 @@ class RYMupdater:
             assert self.__fileData is not None
             yield self.__fileData.currentFilePath
 
-            initialTags: dict[domain.ID3Keys, list[str]] = self.__getTagsFromFile()
-            artist: str = initialTags[domain.ID3Keys.ARTIST][0]
-            release: str = initialTags[domain.ID3Keys.ALBUM][0]
+            initialTags: dict[domain.ID3Keys, str] = self.__getTagsFromFile()
+            artist: str = initialTags[domain.ID3Keys.ARTIST]
+            release: str = initialTags[domain.ID3Keys.ALBUM]
             if (artist != currentArtist) or (release != currentRelease):
                 currentArtist = artist
                 currentRelease = release
                 currentReleaseUrl = self.__getReleaseURL(artist, release)
                 currentIssueUrl: str = self.__getIssueURLs(currentReleaseUrl)[0]
-            tags: dict[domain.RYMtags, str] = self.__formatTagDictionnary(
+
+            rymTags: dict[domain.RYMtags, str] = self.__formatRYMTagsDictionnary(
                 self.__getIssueTags(currentIssueUrl)
             )
+            id3Tags: dict[domain.ID3Keys, str] = self.__formatID3KeysTagDictionnary(
+                initialTags
+            )
 
-            for rymTag in tags:
-                self.__updateFileTag(domain.ID3Keys[rymTag.name], tags[rymTag])
+            # for rymTag in rymTags:
+            #     self.__updateFileTag(domain.ID3Keys[rymTag.name], rymTags[rymTag])
+
+            # for id3Tag in id3Tags:
+            #     try:
+            #         self.__updateFileTag(id3Tag, id3Tags[id3Tag])
+            #     except IndexError:
+            #         pass
+            self.__updateTags(rymTags, id3Tags)
