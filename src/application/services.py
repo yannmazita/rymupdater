@@ -5,7 +5,6 @@ import src.application.domain as domain
 from pathlib import Path
 from datetime import datetime
 from collections.abc import Iterator
-from itertools import zip_longest
 import re
 
 
