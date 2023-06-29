@@ -64,14 +64,25 @@ class RYMupdater:
     def __updateTags(
         self,
         rymTags: dict[domain.RYMtags, str],
-        id3Tags: dict[domain.ID3Keys, list[str]],
-    ):
+        id3Tags: dict[domain.ID3Keys, str],
+    ) -> None:
         """Updates ID3 frames in loaded file using rymTags and id3Tags.
 
         This will iterate through the keys in the dictionnaries and update the file
         accordingly.
+
+        Args:
+            rymTags: The dictionnary of tags retrieved from RYM.
+            id3Tags: The dictionnary of tags retrieved from the mp3 file.
         """
-        pass
+        combinedDictionnary: dict[str, str] = {}
+        for tag in id3Tags:
+            combinedDictionnary[tag.name] = id3Tags[tag]
+        for tag in rymTags:
+            combinedDictionnary[tag.name] = rymTags[tag]
+
+        for tag in combinedDictionnary:
+            self.__updateFileTag(domain.ID3Keys[tag], combinedDictionnary[tag])
 
     def __getReleaseURL(self, artist: str, release: str) -> str:
         """Gets release URL from first match in RYM search.
@@ -343,15 +354,16 @@ class RYMupdater:
             rymTags: dict[domain.RYMtags, str] = self.__formatRYMTagsDictionnary(
                 self.__getIssueTags(currentIssueUrl)
             )
-            id3Tags: dict[
-                domain.ID3Keys, str
-            ] = self.__formatID3KeysTagDictionnary(initialTags)
+            id3Tags: dict[domain.ID3Keys, str] = self.__formatID3KeysTagDictionnary(
+                initialTags
+            )
 
-            for rymTag in rymTags:
-                self.__updateFileTag(domain.ID3Keys[rymTag.name], rymTags[rymTag])
+            # for rymTag in rymTags:
+            #     self.__updateFileTag(domain.ID3Keys[rymTag.name], rymTags[rymTag])
 
-            for id3Tag in id3Tags:
-                try:
-                    self.__updateFileTag(id3Tag, id3Tags[id3Tag])
-                except IndexError:
-                    pass
+            # for id3Tag in id3Tags:
+            #     try:
+            #         self.__updateFileTag(id3Tag, id3Tags[id3Tag])
+            #     except IndexError:
+            #         pass
+            self.__updateTags(rymTags, id3Tags)
