@@ -43,7 +43,7 @@ class RYMdata:
         """
         urlStart: str = "https://rateyourmusic.com/search?searchterm="
         # urlEnd: str = "&searchtype=l"
-        body: str = quote(artist + release, safe="")
+        body: str = quote(artist + " " + release, safe="")
         searchUrl: str = urlStart + body
         self.__getPage(searchUrl)
 
