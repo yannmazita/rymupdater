@@ -11,6 +11,7 @@ Work in progress.
 - jellyfish = 0.11.2
 - selenium = 4.8.3
 - webdriver-manager = 3.8.5
+- arrow = 1.2.3
 
 ## Installation
 
@@ -37,7 +38,6 @@ Use full paths.
 ## Todo
 - GUI
 - Credit tagging
-- Handling of different user locales when scrapping dates
 - Handling of eventual single releases in albums and EPs
 - Binary package
 - (Vorbis)

@@ -3,7 +3,7 @@ from src.data.webDao import RYMdata
 import src.application.domain as domain
 
 from pathlib import Path
-from datetime import datetime
+import arrow
 from collections.abc import Iterator
 import re
 
@@ -184,11 +184,13 @@ class RYMupdater:
             The formated dictionnary.
         """
         updatedDictionnary: dict[domain.RYMtags, str] = retrievedTags
-        rDate: str = updatedDictionnary[domain.RYMtags.RELEASE_TIME]
-        if not rDate.isdigit():
-            updatedDictionnary[domain.RYMtags.RELEASE_TIME] = datetime.strptime(
-                rDate, "%d %B %Y"
-            ).strftime("%d-%m-%Y")
+        parsedDateFromString: str = updatedDictionnary[domain.RYMtags.RELEASE_TIME]
+        if not parsedDateFromString.isdigit():
+            parsedDateArrowConvert = arrow.get(parsedDateFromString, "D MMMM YYYY", locale="en_US")
+            parsedDateDatetimeConvert = parsedDateArrowConvert.datetime
+            parsedDateArrowFormat = arrow.get(parsedDateDatetimeConvert)
+            parsedDateStringFormat = parsedDateArrowFormat.format("D-M-YYYY", locale="en_US")
+            updatedDictionnary[domain.RYMtags.RELEASE_TIME] = parsedDateStringFormat
         return updatedDictionnary
 
     def __formatLanguageCode(
