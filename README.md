@@ -37,7 +37,6 @@ Use full paths.
 ## Todo
 - GUI
 - Credit tagging
-- Handling of different user locales when scrapping dates
 - Handling of eventual single releases in albums and EPs
 - Binary package
 - (Vorbis)
