@@ -36,7 +36,6 @@ python -m src.presentation.app "/path/of/music/directory"
 Use full paths.
 
 ## Todo
-- CLI
 - GUI
 - Credit tagging
 - Handling of eventual single releases in albums and EPs
