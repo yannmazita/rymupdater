@@ -10,7 +10,6 @@ Work in progress.
 - mutagen = 1.47.0
 - jellyfish = 0.11.2
 - selenium = 4.12.0
-- webdriver-manager = 3.9.1
 - arrow = 1.2.3
 
 ## Installation
