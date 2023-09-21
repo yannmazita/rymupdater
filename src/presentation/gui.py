@@ -82,9 +82,11 @@ class InformationFrame(tk.Frame):
     def updateMusicDirectoryLabel(musicDirectory: str) -> None:
         """Updates music directory label.
 
+        This method uses a getter because it must not use "self" which would be out of
+        scope in SideButtonsFrame.openFileManager, hence why it's static.
+
         Args:
             musicDirectory: The path of the music directory.
-
         Returns:
             None.
         """
