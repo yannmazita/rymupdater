@@ -1,42 +1,50 @@
 from src.application.services import RYMupdater
+import src.presentation.gui_helpers as helpers
 
 import tkinter as tk
+from tkinter import filedialog
+from functools import partial
 from pathlib import Path
 from collections.abc import Iterator
 
 
 class Button(tk.Button):
-    """Custom button"""
+    """Custom button."""
 
-    def __init__(self, parent, text):
-        tk.Button.__init__(self, parent, text=text)
+    def __init__(self, parent, text, command):
+        tk.Button.__init__(self, parent, text=text, command=command)
 
 
 class Label(tk.Label):
-    """Custom label"""
+    """Custom label."""
 
     def __init__(self, parent, text):
         tk.Label.__init__(self, parent, text=text)
 
 
 class SideButtonsFrame(tk.Frame):
-    """Side buttons frame"""
+    """Side buttons frame."""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, relief=tk.RAISED, bd=2)
-        self.__directoryBtn = Button(self, "Directory")
-        self.__startBtn = Button(self, "Start")
-        self.__pauseBtn = Button(self, "Pause")
-        self.__stopBtn = Button(self, "Stop")
+        self.__directoryBtn = Button(self, "Directory", command=partial(helpers.openFileManager, self.directoryBtn))
+        self.__startBtn = Button(self, "Start", command=None)
+        self.__pauseBtn = Button(self, "Pause", command=None)
+        self.__stopBtn = Button(self, "Stop", command=None)
 
         self.__directoryBtn.grid(row=0, column=0, sticky="ew")
         self.__startBtn.grid(row=2, column=0, sticky="ew")
         self.__pauseBtn.grid(row=3, column=0, sticky="ew")
         self.__stopBtn.grid(row=4, column=0, sticky="ew")
 
+    @property
+    def directoryBtn(self):
+        """Directory button"""
+        return self.__directoryBtn
+
 
 class InformationFrame(tk.Frame):
-    """Information frame"""
+    """Information frame."""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -45,7 +53,7 @@ class InformationFrame(tk.Frame):
 
 
 class MainApplication(tk.Frame):
-    """Main application frame"""
+    """Main application frame."""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
