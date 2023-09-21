@@ -42,21 +42,20 @@ class SideButtonsFrame(tk.Frame):
         self.__stopBtn.grid(row=4, column=0, sticky="ew")
 
     @staticmethod
-    def openFileManager():
+    def openFileManager() -> None:
         """Opens file manager.
 
         This static method is called after pressing the "Directory" button.
-        The file manager opens up allowing the user to chose a directory. Its path is then
-        stored in an InformationFrame class attribute, an InformationFrame class method is called
-        to update a label in the GUI accordingly.
+        The file manager opens up allowing the user to chose a directory. Its path is stored
+        and an InformationFrame class method is called to update a label in the GUI accordingly.
 
         Returns:
             None.
         """
-        InformationFrame.directoryPath = filedialog.askdirectory(
+        directoryPath: str = filedialog.askdirectory(
             initialdir="/", title="Select a directory"
         )
-        InformationFrame.updateLibraryPathLabel()
+        InformationFrame.updateLibraryPathLabel(directoryPath)
 
 
 class InformationFrame(tk.Frame):
@@ -67,7 +66,6 @@ class InformationFrame(tk.Frame):
     """
 
     instance: Self | None = None
-    directoryPath: str = ""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -81,11 +79,11 @@ class InformationFrame(tk.Frame):
         return self.__libraryPathLabel
 
     @staticmethod
-    def updateLibraryPathLabel():
+    def updateLibraryPathLabel(directoryPath: str) -> None:
         """Updates library path label"""
         assert InformationFrame.instance is not None
         InformationFrame.instance.libraryPathLabel.configure(
-            text=f"Library path: {InformationFrame.directoryPath}"
+            text=f"Library path: {directoryPath}"
         )
 
 
@@ -93,7 +91,6 @@ class MainApplication(tk.Frame):
     """Main application frame."""
 
     instance: Self | None = None
-    directoryPath: str = ""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
