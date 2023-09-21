@@ -52,10 +52,10 @@ class SideButtonsFrame(tk.Frame):
         Returns:
             None.
         """
-        directoryPath: str = filedialog.askdirectory(
+        musicDirectory: str = filedialog.askdirectory(
             initialdir="/", title="Select a directory"
         )
-        InformationFrame.updateLibraryPathLabel(directoryPath)
+        InformationFrame.updateMusicDirectoryLabel(musicDirectory)
 
 
 class InformationFrame(tk.Frame):
@@ -69,28 +69,33 @@ class InformationFrame(tk.Frame):
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.__libraryPathLabel = Label(self, text="[No directory selected]")
-        self.__libraryPathLabel.grid(row=0, column=0)
+        self.__musicDirectoryLabel = Label(self, text="[No directory selected]")
+        self.__musicDirectoryLabel.grid(row=0, column=0)
         InformationFrame.instance = self
 
     @property
-    def libraryPathLabel(self) -> Label:
-        """Library path label."""
-        return self.__libraryPathLabel
+    def musicDirectoryLabel(self) -> Label:
+        """Music directory label."""
+        return self.__musicDirectoryLabel
 
     @staticmethod
-    def updateLibraryPathLabel(directoryPath: str) -> None:
-        """Updates library path label"""
+    def updateMusicDirectoryLabel(musicDirectory: str) -> None:
+        """Updates music directory label.
+
+        Args:
+            musicDirectory: The path of the music directory.
+
+        Returns:
+            None.
+        """
         assert InformationFrame.instance is not None
-        InformationFrame.instance.libraryPathLabel.configure(
-            text=f"Library path: {directoryPath}"
+        InformationFrame.instance.musicDirectoryLabel.configure(
+            text=f"Library path: {musicDirectory}"
         )
 
 
 class MainApplication(tk.Frame):
     """Main application frame."""
-
-    instance: Self | None = None
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
