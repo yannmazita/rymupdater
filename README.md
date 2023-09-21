@@ -6,7 +6,7 @@ Work in progress.
 ## Dependencies
 
 - chromium
-- python >= 3.10
+- python >= 3.11
 - mutagen = 1.47.0
 - jellyfish = 0.11.2
 - selenium = 4.12.0
