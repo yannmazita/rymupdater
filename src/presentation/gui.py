@@ -82,8 +82,8 @@ class InformationFrame(tk.Frame):
     def updateMusicDirectoryLabel(musicDirectory: str) -> None:
         """Updates music directory label.
 
-        This method uses a getter because it must not use "self" which would be out of
-        scope in SideButtonsFrame.openFileManager, hence why it's static.
+        A static method and a getter are used to ensure the SideButtonsFrame.openFileManager
+        callback can modify an in-scope object.
 
         Args:
             musicDirectory: The path of the music directory.
@@ -96,8 +96,8 @@ class InformationFrame(tk.Frame):
         )
 
 
-class MainApplication(tk.Frame):
-    """Main application frame."""
+class Gui(tk.Frame):
+    """GUI main frame."""
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
@@ -111,8 +111,9 @@ class MainApplication(tk.Frame):
         parent.columnconfigure(1, minsize=600, weight=1)
 
 
-if __name__ == "__main__":
+def startGUI() -> None:
+    """Starts the GUI."""
     root = tk.Tk()
     root.title("RYMupdater")
-    mainApp = MainApplication(root)
+    gui = Gui(root)
     root.mainloop()

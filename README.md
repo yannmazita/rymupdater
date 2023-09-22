@@ -28,14 +28,28 @@ python -m pip install -r requirements.txt
 ```
 ## Running
 
-Inside the cloned repository
+Inside the cloned repository:
 ```commandline
-python -m src.presentation.app "/path/of/music/directory"
+python -m src.presentation.app
+```
+The GUI will start by default when no arguments are provided.
+
+### CLI
+
+To start the CLI:
+```commandline
+python -m src.presentation.app -c "/path/of/music/directory"
 ```
 Use full paths.
 
+### GUI
+
+To explicitly start the GUI:
+```commandline
+python -m src.presentation.app -g
+```
+
 ## Todo
-- GUI
 - Credit tagging
 - Handling of eventual single releases in albums and EPs
 - Binary package
