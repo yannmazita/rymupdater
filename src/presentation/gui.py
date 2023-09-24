@@ -34,15 +34,15 @@ class SideButtonsFrame(tk.Frame):
         )
         assert InformationFrame.instance is not None
         self.__startBtn: Button = Button(
-            self, "Start", command=InformationFrame.instance.displayCurrentFilePath
+            self, "Start", command=InformationFrame.instance.updateCurrentFilePath
         )
         self.__pauseBtn: Button = Button(self, "Pause", command=None)
         self.__stopBtn: Button = Button(self, "Stop", command=None)
 
         self.__directoryBtn.grid(row=0, column=0, sticky="ew")
         self.__startBtn.grid(row=2, column=0, sticky="ew")
-        self.__pauseBtn.grid(row=3, column=0, sticky="ew")
-        self.__stopBtn.grid(row=4, column=0, sticky="ew")
+        # self.__pauseBtn.grid(row=3, column=0, sticky="ew")
+        # self.__stopBtn.grid(row=4, column=0, sticky="ew")
 
     @staticmethod
     def openFileManager() -> None:
@@ -51,6 +51,7 @@ class SideButtonsFrame(tk.Frame):
         This static method updates the tk.StringVar musicDirectoryPath in the InformationFrame
         instance.
         This allows the label using this tk.StringVar to be automatically updated.
+
         Returns:
             None.
         """
@@ -79,9 +80,8 @@ class InformationFrame(tk.Frame):
         self.__currentFilePathLabel = Label(self, textvariable=self.__currentFilePath)
 
         self.__rym: RYMupdater = RYMupdater()
-        self.__filePaths: Iterator[Path] = self.__rym.tagLibrary(
-            Path(self.__musicDirectoryPath.get())
-        )
+        self.__filePaths: Iterator[Path] | None = None
+        # don't initialize the iterator without a real path in self.__currentFilePath
 
         self.__musicDirectoryLabel.grid(row=0, column=0)
         self.__currentFilePathLabel.grid(row=1, column=0)
@@ -92,15 +92,25 @@ class InformationFrame(tk.Frame):
         """Music directory path."""
         return self.__musicDirectoryPath
 
-    def displayCurrentFilePath(self) -> None:
-        assert InformationFrame.instance is not None
+    def updateCurrentFilePath(self) -> None:
+        """Updates the current file path.
+
+        This method initialize the iterator going through the music library. Initialization
+        here and not in the constructor ensures the iterator doesn't start in a non-path
+        (and silently stops iterating).
+
+        Returns:
+            None
+        """
+        if self.__filePaths is None:
+            self.__filePaths = self.__rym.tagLibrary(Path(self.__musicDirectoryPath.get()))
         try:
             currentPath: Path = next(self.__filePaths)
         except StopIteration:
             self.__currentFilePath.set("done")
             return
         self.__currentFilePath.set(str(currentPath))
-        self.__currentFilePathLabel.after(10, self.displayCurrentFilePath)
+        self.__currentFilePathLabel.after(10, self.updateCurrentFilePath)
 
 
 class Gui(tk.Frame):
