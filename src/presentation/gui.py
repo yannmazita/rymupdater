@@ -17,8 +17,8 @@ class Button(tk.Button):
 class Label(tk.Label):
     """Custom label."""
 
-    def __init__(self, parent, text):
-        tk.Label.__init__(self, parent, text=text)
+    def __init__(self, parent, textvariable):
+        tk.Label.__init__(self, parent, textvariable=textvariable)
 
 
 class SideButtonsFrame(tk.Frame):
@@ -32,7 +32,10 @@ class SideButtonsFrame(tk.Frame):
         self.__directoryBtn: Button = Button(
             self, "Directory", command=SideButtonsFrame.openFileManager
         )
-        self.__startBtn: Button = Button(self, "Start", command=None)
+        assert InformationFrame.instance is not None
+        self.__startBtn: Button = Button(
+            self, "Start", command=InformationFrame.instance.displayCurrentFilePath
+        )
         self.__pauseBtn: Button = Button(self, "Pause", command=None)
         self.__stopBtn: Button = Button(self, "Stop", command=None)
 
@@ -45,17 +48,16 @@ class SideButtonsFrame(tk.Frame):
     def openFileManager() -> None:
         """Opens file manager.
 
-        This static method is called after pressing the "Directory" button.
-        The file manager opens up allowing the user to chose a directory. Its path is stored
-        and an InformationFrame class method is called to update a label in the GUI accordingly.
-
+        This static method updates the tk.StringVar musicDirectoryPath in the InformationFrame
+        instance.
+        This allows the label using this tk.StringVar to be automatically updated.
         Returns:
             None.
         """
-        musicDirectory: str = filedialog.askdirectory(
-            initialdir="/", title="Select a directory"
+        assert InformationFrame.instance is not None
+        InformationFrame.instance.musicDirectoryPath.set(
+            filedialog.askdirectory(initialdir="/", title="Select a directory")
         )
-        InformationFrame.updateMusicDirectoryLabel(musicDirectory)
 
 
 class InformationFrame(tk.Frame):
@@ -69,40 +71,47 @@ class InformationFrame(tk.Frame):
 
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.__musicDirectoryLabel = Label(self, text="[No directory selected]")
+        self.__musicDirectoryPath: tk.StringVar = tk.StringVar(
+            value="[No directory selected]"
+        )
+        self.__currentFilePath: tk.StringVar = tk.StringVar(value="[No input file]")
+        self.__musicDirectoryLabel = Label(self, textvariable=self.__musicDirectoryPath)
+        self.__currentFilePathLabel = Label(self, textvariable=self.__currentFilePath)
+
+        self.__rym: RYMupdater = RYMupdater()
+        self.__filePaths: Iterator[Path] = self.__rym.tagLibrary(
+            Path(self.__musicDirectoryPath.get())
+        )
+
         self.__musicDirectoryLabel.grid(row=0, column=0)
+        self.__currentFilePathLabel.grid(row=1, column=0)
         InformationFrame.instance = self
 
     @property
-    def musicDirectoryLabel(self) -> Label:
-        """Music directory label."""
-        return self.__musicDirectoryLabel
+    def musicDirectoryPath(self) -> tk.StringVar:
+        """Music directory path."""
+        return self.__musicDirectoryPath
 
-    @staticmethod
-    def updateMusicDirectoryLabel(musicDirectory: str) -> None:
-        """Updates music directory label.
-
-        A static method and a getter are used to ensure the SideButtonsFrame.openFileManager
-        callback can modify an in-scope object.
-
-        Args:
-            musicDirectory: The path of the music directory.
-        Returns:
-            None.
-        """
+    def displayCurrentFilePath(self) -> None:
         assert InformationFrame.instance is not None
-        InformationFrame.instance.musicDirectoryLabel.configure(
-            text=f"Library path: {musicDirectory}"
-        )
+        try:
+            currentPath: Path = next(self.__filePaths)
+        except StopIteration:
+            self.__currentFilePath.set("done")
+            return
+        self.__currentFilePath.set(str(currentPath))
+        self.__currentFilePathLabel.after(10, self.displayCurrentFilePath)
 
 
 class Gui(tk.Frame):
     """GUI main frame."""
 
+    instance: Self | None = None
+
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
-        self.__sideButtons: SideButtonsFrame = SideButtonsFrame(parent)
         self.__information: InformationFrame = InformationFrame(parent)
+        self.__sideButtons: SideButtonsFrame = SideButtonsFrame(parent)
 
         self.__sideButtons.grid(row=0, column=0, sticky="ns")
         self.__information.grid(row=0, column=1, sticky="n")
