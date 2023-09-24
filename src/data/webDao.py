@@ -4,8 +4,6 @@ from urllib.parse import quote
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromiumService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.utils import ChromeType
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
@@ -22,11 +20,7 @@ class RYMdata:
 
     def __init__(self):
         """Initiliazes the instance."""
-        self.__driver: webdriver.Chrome = webdriver.Chrome(
-            service=ChromiumService(
-                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-            )
-        )
+        self.__driver: webdriver.Chrome = webdriver.Chrome()
 
     def __getPage(self, url: str) -> None:
         if self.__driver.current_url != url:
