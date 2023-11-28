@@ -1,6 +1,6 @@
-from src.data.localDao import FileData
-from src.data.webDao import RYMdata
-import src.application.domain as domain
+import rymupdater.tagging as tagging
+import rymupdater.domain as domain
+from .scraping import RYMdata
 
 from pathlib import Path
 import arrow
@@ -13,7 +13,7 @@ class RYMupdater:
 
     def __init__(self):
         """Initialiazes the instance."""
-        self.__fileData: FileData | None = None
+        self.__fileData: tagging.FileData | None = None
         self.__rymData: RYMdata | None = None
 
     def __initializeData(self, musicDirectory: Path) -> None:
@@ -24,7 +24,7 @@ class RYMupdater:
         Returns:
             None.
         """
-        self.__fileData = FileData(musicDirectory)
+        self.__fileData = tagging.FileData(musicDirectory)
         self.__rymData = RYMdata()
 
     def __loadNextFile(self) -> bool:

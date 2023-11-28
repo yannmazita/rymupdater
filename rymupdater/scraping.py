@@ -1,4 +1,4 @@
-from src.application.domain import RYMtags
+from .domain import RYMtags
 
 from urllib.parse import quote
 

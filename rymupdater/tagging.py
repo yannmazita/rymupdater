@@ -32,7 +32,7 @@ from mutagen.id3._frames import (
     POPM
 )
 
-from src.application.domain import ID3Keys
+from rymupdater.domain import ID3Keys
 
 
 class FileData:

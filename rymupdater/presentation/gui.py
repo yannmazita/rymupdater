@@ -1,4 +1,4 @@
-from src.application.services import RYMupdater
+from ..services import RYMupdater
 
 import tkinter as tk
 from tkinter import filedialog

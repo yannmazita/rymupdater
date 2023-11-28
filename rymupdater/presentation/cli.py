@@ -1,4 +1,4 @@
-from src.application.services import RYMupdater
+from ..services import RYMupdater
 
 from pathlib import Path
 from collections.abc import Iterator
