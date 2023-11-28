@@ -6,8 +6,8 @@ Work in progress.
 ## Dependencies
 
 - chromium
-- python >= 3.11
-- mutagen = 1.47.0
+- python = 3.11
+- mutagen = 1.46.0
 - jellyfish = 0.11.2
 - selenium = 4.12.0
 - arrow = 1.2.3
@@ -38,7 +38,7 @@ The GUI will start by default when no arguments are provided.
 
 To start the CLI:
 ```commandline
-python -m src.presentation.app -c "/path/of/music/directory"
+python -m rymupdater.presentation.app -c "/path/of/music/directory"
 ```
 Use full paths.
 
@@ -46,7 +46,7 @@ Use full paths.
 
 To explicitly start the GUI:
 ```commandline
-python -m src.presentation.app -g
+python -m rymupdater.presentation.app -g
 ```
 
 ## Todo
