@@ -1,4 +1,5 @@
 # rymupdater
+rymupdater is now read only. RYM has made scrapping somewhat more difficult without offering an API.
 
 **rymupdater** is an id3 tag updater using information found at rateyourmusic.com.
 Work in progress.
